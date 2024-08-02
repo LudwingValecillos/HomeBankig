@@ -1,7 +1,6 @@
 package com.mainhub.homebanking;
 
 import com.mainhub.homebanking.models.Client;
-import com.mainhub.homebanking.models.TypePet;
 import com.mainhub.homebanking.repositories.ClientRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -30,6 +29,8 @@ public class HomebankingApplication {
 			clientRepository.save(new Client("Chloe", "O'Brian", "chloe@example.com"));
 			clientRepository.save(new Client("Kim", "Bauer", "kim@example.com"));
 			clientRepository.save(new Client("David", "Palmer", "david@example.com"));
+			clientRepository.save(new Client("Sol", "Osorio", "osorio@example.com"));
+
 			clientRepository.save(new Client("Michelle", "Dessler", "michelle@example.com"));
 		};
 	}
