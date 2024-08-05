@@ -14,16 +14,15 @@ public class HomebankingApplication {
 		SpringApplication.run(HomebankingApplication.class, args);
 	}
 
-	@Bean
-	public CommandLineRunner initData(ClientRepository clientRepository) {
+	@Bean // Inyección de dependencias para el repositorio de clientes Bean es un objeto que se inyecta en el controlador.
+
+	public CommandLineRunner initData(ClientRepository clientRepository) { // CommandLineRunner es una interfaz que define un método de inicialización de línea de comandos.
 		
-		return (args) -> {
+		return (args) -> { // El método de inicialización de línea de comandos se ejecuta cuando se inicia la aplicación. args es un arreglo de argumentos de línea de comandos.
 			// Guardar algunos clientes
 			Client pepe = new Client("Pepe", "Pepe", "pepe@mindhub.com");
 
-
 			clientRepository.save(pepe);
-
 
 			clientRepository.save(new Client("Melba", "Morel", "melba@mindhub.com"));
 			clientRepository.save(new Client("Chloe", "O'Brian", "chloe@example.com"));
