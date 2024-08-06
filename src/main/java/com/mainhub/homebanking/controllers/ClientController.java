@@ -1,5 +1,7 @@
 package com.mainhub.homebanking.controllers;
 
+import com.fasterxml.jackson.annotation.Nulls;
+import com.mainhub.homebanking.Dtos.ClientDTO;
 import com.mainhub.homebanking.models.Client;
 import com.mainhub.homebanking.repositories.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,93 +9,103 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-@RestController // Indica que la clase es un controlador de recursos, se encarga de manejar las solicitudes HTTP (GET, POST, PUT, DELETE, etc.)
-@RequestMapping("/api/clients")// Indica la ruta base para las solicitudes. Api es una convención para los controladores de recursos
+import static java.util.stream.Collectors.toList;
+
+@RestController
+@RequestMapping("/api/clients")
+//Se le dice api para seguir la convención de rutas para el controlador
+
+// Indica que la clase es un controlador de recursos y maneja las solicitudes HTTP (GET, POST, PUT, DELETE, etc.).
+
+// La ruta base para las solicitudes es "/api/clients".
+
 public class ClientController {
-    @Autowired // Inyección de dependencias para el repositorio de clientes
-    private ClientRepository clientRepository; // Inyección de dependencias para el repositorio de clientes, la implentacion lo hace hibernate
+    @Autowired
+    //conecta/cablea a la interfaz de clientrepository que esta extiende de jpa repository para utilizar sus metodos, lo que se denomida inyeccion de dependencias.
+    private ClientRepository clientRepository;
+    // Inyección de dependencias para el repositorio de clientes.
 
+    ////////------------------------------- Servlet --------------------------------------//////////
+
+    //Mapping es lo que se representa en el navegador
     @GetMapping("/")
-    //  Indica que la ruta "/" es el punto de entrada para las solicitudes GET
+    // Maneja las solicitudes GET a la ruta base "/" para obtener todos los clientes.
+    public List<ClientDTO> getAllClients() {
+        return clientRepository.findAll().stream().map(ClientDTO::new).collect(toList());
 
-    // Estamos estableciendo que vamos a recibir una peticion en este caso de tipo GET, por medio del controlador para acceder al metodo getAllClients
-    public List<Client> getAllClients() {
-        return clientRepository.findAll();
+        // .stream() es una operación que devuelve un flujo de datos que puede ser consumido de forma eficiente.
     }
-
 
     @GetMapping("/id={id}")
-    public ResponseEntity<Client> getById(@PathVariable Long id) { // @PathVariable indica que el parámetro id es una variable de ruta (Path ruta en español)
-        Optional<Client> clientOptional = clientRepository.findById(id);
-        System.out.println(clientRepository);
-        if (clientOptional.isPresent()) {
-            Client client = clientOptional.get();
-            client.setId(id); // Asegúrate de establecer el ID del cliente en el objeto
-            return ResponseEntity.ok(client);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-
+    // Maneja las solicitudes GET para obtener un cliente por ID.
+    public ResponseEntity<Client> getById(@PathVariable Long id) {
+        //PathVariable es un parámetro de ruta que se pasa en la URL de la solicitud HTTP para que busque la entidad correspondiente
+        return clientRepository.findById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
+
     @DeleteMapping("/id={id}")
+    // Maneja las solicitudes DELETE para eliminar un cliente por ID.
     public void deleteClient(@PathVariable Long id) {
         clientRepository.deleteById(id);
-
-    }
-    @PutMapping("/id={id}&firstName={firstName}&lastName={lastName}&email={email}")
-    public void updateClient(@PathVariable Long id, @PathVariable String firstName, @PathVariable String lastName, @PathVariable String email) {
-        Optional<Client> clientOptional = clientRepository.findById(id);
-        if (clientOptional.isPresent()) {
-            Client client = clientOptional.get();
-            client.setFirstName(firstName);
-            client.setLastName(lastName);
-            client.setEmail(email);
-            clientRepository.save(client);
-        } else {
-            System.out.println("El cliente no existe");
-        }
     }
 
-    //Servlet es un objeto que se encarga de procesar las solicitudes HTTP.
-    @PutMapping("/id={id}&email={email}")
-    public void putEmail(@PathVariable Long id, @PathVariable String email){
-        Optional<Client> clientOptional = clientRepository.findById(id);
-
-        if (clientOptional.isPresent()){
-            Client client = clientOptional.get();
-            client.setEmail(email);
-            clientRepository.save(client);
-        }
-    }
     @PostMapping("/create")
+    // Maneja las solicitudes POST para crear un nuevo cliente.
     public Client agregarClient(@RequestParam String email, @RequestParam String firstName, @RequestParam String lastName) {
         return clientRepository.save(new Client(firstName, lastName, email));
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Client> updateClient(@PathVariable Long id, @RequestParam Map<String, String> params) {
-        Client client = clientRepository.findById(id).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Client not found with id " + id));
+    // Maneja las solicitudes PUT para actualizar un cliente existente.
+    public ResponseEntity<?> updateClient(@PathVariable Long id, @RequestParam String firstName, @RequestParam String lastName, @RequestParam String email) {
+        Client client = clientRepository.findById(id).orElse(null);
 
-        if (params.containsKey("firstName")) {
-            client.setFirstName(params.get("firstName"));
+        if (client == null) {
+            return new ResponseEntity<>("El hijo de remil puta no existe " + id, HttpStatus.NOT_FOUND);
         }
-        if (params.containsKey("lastName")) {
-            client.setLastName(params.get("lastName"));
+
+        client.setFirstName(firstName);
+        client.setLastName(lastName);
+        client.setEmail(email);
+        Client updatedClient = clientRepository.save(client);
+        return new ResponseEntity<>(updatedClient, HttpStatus.OK);
+    }
+
+    //ResponseEntity es una clase que representa una respuesta HTTP. Se utiliza para devolver una respuesta HTTP con un código de estado y un objeto de respuesta.
+    @PatchMapping("/update/{id}")
+    public ResponseEntity<?> partialUpdateClient(@PathVariable Long id,
+                                                 @RequestParam(required = false) String firstName,
+                                                 @RequestParam(required = false) String lastName,
+                                                 @RequestParam(required = false) String email) {
+
+        Client client = clientRepository.findById(id).orElse(null);
+
+        if (client == null) {
+            return new ResponseEntity<>("El hijo de remil puta no existe " + id, HttpStatus.NOT_FOUND);
         }
-        if (params.containsKey("email")) {
-            client.setEmail(params.get("email"));
+
+        if (firstName != null) {
+            client.setFirstName(firstName);
+        }
+        if (lastName != null) {
+            client.setLastName(lastName);
+        }
+        if (email != null) {
+            client.setEmail(email);
         }
 
         Client updatedClient = clientRepository.save(client);
         return new ResponseEntity<>(updatedClient, HttpStatus.OK);
     }
 
+
     @GetMapping("/hello")
+    //
     public String getClients() {
         return "Hello Clientes, me gusta el pan";
     }
