@@ -1,8 +1,11 @@
 package com.mainhub.homebanking.controllers;
 
 import com.fasterxml.jackson.annotation.Nulls;
+import com.mainhub.homebanking.Dtos.AccountDTO;
 import com.mainhub.homebanking.Dtos.ClientDTO;
+import com.mainhub.homebanking.models.Account;
 import com.mainhub.homebanking.models.Client;
+import com.mainhub.homebanking.repositories.AccountRepository;
 import com.mainhub.homebanking.repositories.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +32,10 @@ public class ClientController {
     @Autowired
     //conecta/cablea a la interfaz de clientrepository que esta extiende de jpa repository para utilizar sus metodos, lo que se denomida inyeccion de dependencias.
     private ClientRepository clientRepository;
+
+    @Autowired
+    private AccountRepository accountRepository;
+    static private int num = 7;
     // Inyección de dependencias para el repositorio de clientes.
 
     ////////------------------------------- Servlet --------------------------------------//////////
@@ -43,9 +51,12 @@ public class ClientController {
 
     @GetMapping("/id={id}")
     // Maneja las solicitudes GET para obtener un cliente por ID.
-    public ResponseEntity<Client> getById(@PathVariable Long id) {
-        //PathVariable es un parámetro de ruta que se pasa en la URL de la solicitud HTTP para que busque la entidad correspondiente
-        return clientRepository.findById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ClientDTO> getById(@PathVariable Long id) {
+
+        return clientRepository.findById(id).map(ClientDTO::new) // Convertir Client a ClientDTO
+                .map(ResponseEntity::ok) // Si está presente, devolver 200 OK con el ClientDTO
+                .orElse(ResponseEntity.notFound().build());
+
     }
 
     @DeleteMapping("/id={id}")
@@ -56,8 +67,22 @@ public class ClientController {
 
     @PostMapping("/create")
     // Maneja las solicitudes POST para crear un nuevo cliente.
-    public Client agregarClient(@RequestParam String email, @RequestParam String firstName, @RequestParam String lastName) {
-        return clientRepository.save(new Client(firstName, lastName, email));
+    public ResponseEntity<ClientDTO> agregarClient(@RequestParam String email, @RequestParam String firstName, @RequestParam String lastName) {
+        Client client = new Client(firstName, lastName, email);
+
+
+        ClientDTO clientDTO = new ClientDTO(clientRepository.save(client));
+
+//        String numero = "VIN00"+ String.valueOf(this.num);
+
+        Account account = new Account( "VIN00"+ String.valueOf(this.num), LocalDate.now(), 0);
+        this.num = this.num + 1;
+
+        client.addAccount(account);
+        AccountDTO accountDTO = new AccountDTO(accountRepository.save(account));
+
+
+        return ResponseEntity.ok(clientDTO);
     }
 
     @PutMapping("/update/{id}")
@@ -72,8 +97,11 @@ public class ClientController {
         client.setFirstName(firstName);
         client.setLastName(lastName);
         client.setEmail(email);
-        Client updatedClient = clientRepository.save(client);
-        return new ResponseEntity<>(updatedClient, HttpStatus.OK);
+
+        ClientDTO clientDTO = new ClientDTO(clientRepository.save(client));
+
+
+        return new ResponseEntity<>(clientDTO, HttpStatus.OK);
     }
 
     //ResponseEntity es una clase que representa una respuesta HTTP. Se utiliza para devolver una respuesta HTTP con un código de estado y un objeto de respuesta.
@@ -99,8 +127,10 @@ public class ClientController {
             client.setEmail(email);
         }
 
-        Client updatedClient = clientRepository.save(client);
-        return new ResponseEntity<>(updatedClient, HttpStatus.OK);
+
+        ClientDTO clientDTO = new ClientDTO(clientRepository.save(client));
+
+        return new ResponseEntity<>(clientDTO, HttpStatus.OK);
     }
 
 
