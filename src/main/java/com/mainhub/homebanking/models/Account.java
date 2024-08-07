@@ -5,21 +5,25 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Account {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
-    @SequenceGenerator(name = "native", sequenceName = "hibernate_sequence")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String number;
     private LocalDate creationDate = LocalDate.now();
     private double balance;
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "client_id")
+    //La referencia con el client se llama una referencia foreign key / clave foranea
     private Client client; // Propiedad para establecer la relación con Client
+
+    @OneToMany(mappedBy="account", fetch=FetchType.EAGER)
+    private Set<Transaction> transactions = new HashSet<>();
 
     public Account() {
     }
@@ -66,6 +70,19 @@ public class Account {
 
     public void setClient(Client client) {
         this.client = client;
+    }
+
+    public void addTransaction(Transaction transaction) {
+        this.transactions.add(transaction);
+        transaction.setAccount(this);
+    }
+
+    public Set<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(Set<Transaction> transactions) {
+        this.transactions = transactions;
     }
 
     @Override

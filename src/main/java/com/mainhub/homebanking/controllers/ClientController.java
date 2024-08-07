@@ -47,6 +47,9 @@ public class ClientController {
         return clientRepository.findAll().stream().map(ClientDTO::new).collect(toList());
 
         // .stream() es una operación que devuelve un flujo de datos que puede ser consumido de forma eficiente.
+        //.map(ClientDTO::new) es una operación que aplica una función a cada elemento del flujo de datos y devuelve un nuevo flujo de datos con los resultados.
+        // .collect(toList()) es una operación que convierte el flujo de datos en una lista.
+
     }
 
     @GetMapping("/id={id}")

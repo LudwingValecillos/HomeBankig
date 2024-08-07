@@ -3,11 +3,17 @@ package com.mainhub.homebanking.Dtos;
 import com.mainhub.homebanking.models.Account;
 import com.mainhub.homebanking.models.Client;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public class AccountDTO {
 
     private Long id;
     private String number;
     private double balance;
+
+    private Set<TransactionDTO> transactions = new HashSet<>();
 
 
 
@@ -18,6 +24,7 @@ public class AccountDTO {
         this.id = account.getId();
         this.number = account.getNumber();
         this.balance = account.getBalance();
+        this.transactions = account.getTransactions().stream().map(TransactionDTO::new).collect(Collectors.toSet());
 
     }
 
@@ -33,5 +40,7 @@ public class AccountDTO {
         return balance;
     }
 
-
+    public Set<TransactionDTO> getTransactions() {
+        return transactions;
+    }
 }
