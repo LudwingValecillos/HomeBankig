@@ -1,14 +1,9 @@
 package com.mainhub.homebanking;
 
-import com.mainhub.homebanking.Dtos.AccountDTO;
-import com.mainhub.homebanking.Dtos.ClientDTO;
-import com.mainhub.homebanking.models.Account;
-import com.mainhub.homebanking.models.Client;
-import com.mainhub.homebanking.models.Transaction;
-import com.mainhub.homebanking.models.TransactionType;
-import com.mainhub.homebanking.repositories.AccountRepository;
-import com.mainhub.homebanking.repositories.ClientRepository;
-import com.mainhub.homebanking.repositories.TransactionRepository;
+import com.mainhub.homebanking.DTO.AccountDTO;
+import com.mainhub.homebanking.DTO.ClientDTO;
+import com.mainhub.homebanking.models.*;
+import com.mainhub.homebanking.repositories.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 @SpringBootApplication
 public class HomebankingApplication {
@@ -25,7 +21,7 @@ public class HomebankingApplication {
 	}
 
 	@Bean // Le dice a Spring que lo tenga en cuenta cuando arranca la aplicación
-	public CommandLineRunner initData(ClientRepository clientRepository, AccountRepository accountRepository, TransactionRepository transactionRepository) {
+	public CommandLineRunner initData(ClientRepository clientRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, LoanRepository loanRepository, ClientLoanRepository clientLoanRepository) {
 		return (args) -> {
 			LocalDate today = LocalDate.now();
 			LocalDate tomorrow = today.plusDays(1);
@@ -39,6 +35,7 @@ public class HomebankingApplication {
 			Account cuenta2Pepe = new Account("VIN002", today, 7500);
 			pepe.addAccount(cuenta1Pepe);
 			pepe.addAccount(cuenta2Pepe);
+
 			accountRepository.save(cuenta1Pepe);
 			accountRepository.save(cuenta2Pepe);
 
@@ -101,18 +98,56 @@ public class HomebankingApplication {
 			// Crear DTOs de clientes
 			ClientDTO clientDTO1 = new ClientDTO(pepe);
 			ClientDTO clientDTO2 = new ClientDTO(melba);
-			// ClientDTO clientDTO3 = new ClientDTO(chloe);
+
 
 			// Crear DTOs de cuentas
 			AccountDTO accountDTO1 = new AccountDTO(cuenta1Pepe);
 			AccountDTO accountDTO2 = new AccountDTO(cuenta2Pepe);
 			AccountDTO accountDTO3 = new AccountDTO(cuenta1Melba);
 			AccountDTO accountDTO4 = new AccountDTO(cuenta2Melba);
-			// AccountDTO accountDTO5 = new AccountDTO(cuenta1Chloe);
-			// AccountDTO accountDTO6 = new AccountDTO(cuenta2Chloe);
 
-			// Los DTOs pueden ser utilizados para otras operaciones,
-			// como enviar datos a la vista o realizar otras transformaciones.
+			Loan hipotcario = new Loan("Hipotecario", 500000, Arrays.asList(12, 24, 36, 48, 60));
+			loanRepository.save(hipotcario);
+
+			Loan personal = new Loan("Personal", 100000, Arrays.asList(6, 12, 24));
+			loanRepository.save(personal);
+
+			Loan automotriz = new Loan("Automotriz", 300000, Arrays.asList(6, 12, 24,36));
+			loanRepository.save(automotriz);
+
+			//MELBA PIDIENDO PRESTAMO 😒
+			ClientLoan clientLoan1 = new ClientLoan(400, 60);
+
+			melba.addClientLoan(clientLoan1);
+
+			hipotcario.addClientLoan(clientLoan1);
+
+			clientLoanRepository.save(clientLoan1);
+
+			ClientLoan clientLoan2 = new ClientLoan(50000, 12);
+
+			melba.addClientLoan(clientLoan2);
+
+			personal.addClientLoan(clientLoan2);
+
+			clientLoanRepository.save(clientLoan2);
+
+			//PEPE PIDIENDO PRESTAMO 😒
+			ClientLoan clientLoan3 = new ClientLoan(100000, 24);
+
+			pepe.addClientLoan(clientLoan3);
+
+			personal.addClientLoan(clientLoan3);
+
+			clientLoanRepository.save(clientLoan3);
+
+			ClientLoan clientLoan4 = new ClientLoan(200000, 36);
+
+			pepe.addClientLoan(clientLoan4);
+
+			automotriz.addClientLoan(clientLoan4);
+
+			clientLoanRepository.save(clientLoan4);
 		};
 	}
 }

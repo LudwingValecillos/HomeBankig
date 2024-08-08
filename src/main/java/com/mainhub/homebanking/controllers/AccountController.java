@@ -1,7 +1,6 @@
 package com.mainhub.homebanking.controllers;
 
-import com.mainhub.homebanking.Dtos.AccountDTO;
-import com.mainhub.homebanking.Dtos.ClientDTO;
+import com.mainhub.homebanking.DTO.AccountDTO;
 import com.mainhub.homebanking.repositories.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

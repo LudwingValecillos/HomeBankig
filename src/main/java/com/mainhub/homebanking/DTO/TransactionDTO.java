@@ -1,4 +1,4 @@
-package com.mainhub.homebanking.Dtos;
+package com.mainhub.homebanking.DTO;
 
 import com.mainhub.homebanking.models.Transaction;
 import com.mainhub.homebanking.models.TransactionType;

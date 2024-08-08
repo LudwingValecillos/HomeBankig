@@ -1,8 +1,12 @@
 package com.mainhub.homebanking.models;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.mainhub.homebanking.repositories.AccountRepository;
+import com.mainhub.homebanking.repositories.AccountRepository;
+
 import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -10,10 +14,10 @@ import java.util.Set;
 
 @Entity
 public class Account {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    //private modificador de acceso (public, private, protected, etc.)
     private String number;
     private LocalDate creationDate = LocalDate.now();
     private double balance;
@@ -75,6 +79,7 @@ public class Account {
     public void addTransaction(Transaction transaction) {
         this.transactions.add(transaction);
         transaction.setAccount(this);
+
     }
 
     public Set<Transaction> getTransactions() {

@@ -1,10 +1,10 @@
 package com.mainhub.homebanking.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity //Le estamos idicando a spring que genere una tabla en la base de datos
@@ -17,8 +17,11 @@ public class Client {
     private String email;
 
     @OneToMany(mappedBy="client", fetch=FetchType.EAGER)
-
     private Set<Account> accounts = new HashSet<>();
+
+    @OneToMany(mappedBy="client", fetch=FetchType.EAGER)
+    private List<ClientLoan> loans = new ArrayList<>();
+
     public Client() {
     }
 
@@ -63,6 +66,14 @@ public class Client {
         this.email = email;
     }
 
+    public List<ClientLoan> getLoans() {
+        return loans;
+    }
+
+    public void setLoans(List<ClientLoan> loans) {
+        this.loans = loans;
+    }
+
     public Set<Account> getAccounts() {
         return accounts;
     }
@@ -76,6 +87,12 @@ public class Client {
         account.setClient(this);
 
     }
+
+    public void addClientLoan(ClientLoan clientLoan) {
+        this.loans.add(clientLoan);
+        clientLoan.setClient(this);
+    }
+
     @Override
     public String toString() {
         return "Client{" +

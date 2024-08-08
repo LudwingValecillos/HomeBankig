@@ -1,8 +1,7 @@
 package com.mainhub.homebanking.controllers;
 
-import com.fasterxml.jackson.annotation.Nulls;
-import com.mainhub.homebanking.Dtos.AccountDTO;
-import com.mainhub.homebanking.Dtos.ClientDTO;
+import com.mainhub.homebanking.DTO.AccountDTO;
+import com.mainhub.homebanking.DTO.ClientDTO;
 import com.mainhub.homebanking.models.Account;
 import com.mainhub.homebanking.models.Client;
 import com.mainhub.homebanking.repositories.AccountRepository;
@@ -11,12 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 
@@ -44,7 +40,7 @@ public class ClientController {
     @GetMapping("/")
     // Maneja las solicitudes GET a la ruta base "/" para obtener todos los clientes.
     public List<ClientDTO> getAllClients() {
-        return clientRepository.findAll().stream().map(ClientDTO::new).collect(toList());
+        return clientRepository.findAll().stream().map(client -> new ClientDTO(client)).collect(toList());
 
         // .stream() es una operación que devuelve un flujo de datos que puede ser consumido de forma eficiente.
         //.map(ClientDTO::new) es una operación que aplica una función a cada elemento del flujo de datos y devuelve un nuevo flujo de datos con los resultados.
