@@ -1,5 +1,6 @@
 package com.mainhub.homebanking.models;
 
+import com.mainhub.homebanking.models.type.TransactionType;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;

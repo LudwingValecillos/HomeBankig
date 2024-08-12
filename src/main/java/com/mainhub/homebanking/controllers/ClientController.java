@@ -40,7 +40,7 @@ public class ClientController {
     @GetMapping("/")
     // Maneja las solicitudes GET a la ruta base "/" para obtener todos los clientes.
     public List<ClientDTO> getAllClients() {
-        return clientRepository.findAll().stream().map(client -> new ClientDTO(client)).collect(toList());
+        return clientRepository.findAll().stream().filter(client -> client.isActive()).map(client -> new ClientDTO(client)).collect(toList());
 
         // .stream() es una operación que devuelve un flujo de datos que puede ser consumido de forma eficiente.
         //.map(ClientDTO::new) es una operación que aplica una función a cada elemento del flujo de datos y devuelve un nuevo flujo de datos con los resultados.
@@ -58,10 +58,19 @@ public class ClientController {
 
     }
 
+    @GetMapping("/disabled")
+    // Maneja las solicitudes GET para obtener todos los clientes desactivados.
+    public List<ClientDTO> getAllClientsDisabled() {
+        return clientRepository.findAll().stream().filter(client -> client.isActive() == false).map(client -> new ClientDTO(client)).collect(toList());
+
+    }
     @DeleteMapping("/id={id}")
     // Maneja las solicitudes DELETE para eliminar un cliente por ID.
-    public void deleteClient(@PathVariable Long id) {
-        clientRepository.deleteById(id);
+    public ResponseEntity<String> deleteClient(@PathVariable Long id) {
+        Client client = clientRepository.findById(id).orElse(null);
+        client.setActive(false);
+        clientRepository.save(client);
+        return ResponseEntity.ok("Client desactived");
     }
 
     @PostMapping("/create")

@@ -1,7 +1,7 @@
 package com.mainhub.homebanking.DTO;
 
 import com.mainhub.homebanking.models.Transaction;
-import com.mainhub.homebanking.models.TransactionType;
+import com.mainhub.homebanking.models.type.TransactionType;
 
 import java.time.LocalDateTime;
 

@@ -3,6 +3,9 @@ package com.mainhub.homebanking;
 import com.mainhub.homebanking.DTO.AccountDTO;
 import com.mainhub.homebanking.DTO.ClientDTO;
 import com.mainhub.homebanking.models.*;
+import com.mainhub.homebanking.models.type.CardColor;
+import com.mainhub.homebanking.models.type.CardType;
+import com.mainhub.homebanking.models.type.TransactionType;
 import com.mainhub.homebanking.repositories.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -21,20 +24,25 @@ public class HomebankingApplication {
 	}
 
 	@Bean // Le dice a Spring que lo tenga en cuenta cuando arranca la aplicación
-	public CommandLineRunner initData(ClientRepository clientRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, LoanRepository loanRepository, ClientLoanRepository clientLoanRepository) {
+	public CommandLineRunner initData(ClientRepository clientRepository,
+									  AccountRepository accountRepository,
+									  TransactionRepository transactionRepository,
+									  LoanRepository loanRepository,
+									  ClientLoanRepository clientLoanRepository,
+									  CardRepository cardRepository) {
 		return (args) -> {
 			LocalDate today = LocalDate.now();
 			LocalDate tomorrow = today.plusDays(1);
 
 			// ***** Cliente Pepe *****
-			Client pepe = new Client("Pepe", "Pepe", "pepe@mindhub.com");
-			clientRepository.save(pepe);
+			Client ludwing = new Client("Ludwing", "Valecillos", "ludwingval@gmail.com");
+			clientRepository.save(ludwing);
 
 			// Crear y guardar cuentas para Pepe
 			Account cuenta1Pepe = new Account("VIN001", today, 500);
 			Account cuenta2Pepe = new Account("VIN002", today, 7500);
-			pepe.addAccount(cuenta1Pepe);
-			pepe.addAccount(cuenta2Pepe);
+			ludwing.addAccount(cuenta1Pepe);
+			ludwing.addAccount(cuenta2Pepe);
 
 			accountRepository.save(cuenta1Pepe);
 			accountRepository.save(cuenta2Pepe);
@@ -96,7 +104,7 @@ public class HomebankingApplication {
 			transactionRepository.save(transaccion3Melba2);
 
 			// Crear DTOs de clientes
-			ClientDTO clientDTO1 = new ClientDTO(pepe);
+			ClientDTO clientDTO1 = new ClientDTO(ludwing);
 			ClientDTO clientDTO2 = new ClientDTO(melba);
 
 
@@ -115,6 +123,7 @@ public class HomebankingApplication {
 			Loan automotriz = new Loan("Automotriz", 300000, Arrays.asList(6, 12, 24,36));
 			loanRepository.save(automotriz);
 
+			// --------------------------- LOAM------------------------
 			//MELBA PIDIENDO PRESTAMO 😒
 			ClientLoan clientLoan1 = new ClientLoan(400, 60);
 
@@ -135,7 +144,7 @@ public class HomebankingApplication {
 			//PEPE PIDIENDO PRESTAMO 😒
 			ClientLoan clientLoan3 = new ClientLoan(100000, 24);
 
-			pepe.addClientLoan(clientLoan3);
+			ludwing.addClientLoan(clientLoan3);
 
 			personal.addClientLoan(clientLoan3);
 
@@ -143,11 +152,28 @@ public class HomebankingApplication {
 
 			ClientLoan clientLoan4 = new ClientLoan(200000, 36);
 
-			pepe.addClientLoan(clientLoan4);
+			ludwing.addClientLoan(clientLoan4);
 
 			automotriz.addClientLoan(clientLoan4);
 
 			clientLoanRepository.save(clientLoan4);
+
+			//------------------CARDS----------------------
+
+			Card cardLud = new Card(04456515151,952,LocalDateTime.now(),LocalDateTime.now().plusYears(5).plusYears(5), CardType.DEBIT, CardColor.Silver);
+
+			ludwing.addCard(cardLud);
+			cardRepository.save(cardLud);
+
+			Card card1 = new Card(04456515151,952,LocalDateTime.now(),LocalDateTime.now().plusYears(5), CardType.DEBIT, CardColor.GOLD);
+			Card card2 = new Card(04456515152,953,LocalDateTime.now(),LocalDateTime.now().plusYears(10), CardType.CREDIT, CardColor.TITANIUM);
+
+			melba.addCard(card1);
+			melba.addCard(card2);
+			cardRepository.save(card1);
+			cardRepository.save(card2);
+
+
 		};
 	}
 }

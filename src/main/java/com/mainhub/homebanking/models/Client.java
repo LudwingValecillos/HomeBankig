@@ -16,12 +16,16 @@ public class Client {
     private String lastName;
     private String email;
 
+    private boolean active = true;
+
     @OneToMany(mappedBy="client", fetch=FetchType.EAGER)
     private Set<Account> accounts = new HashSet<>();
 
     @OneToMany(mappedBy="client", fetch=FetchType.EAGER)
     private List<ClientLoan> loans = new ArrayList<>();
 
+    @OneToMany(mappedBy="client", fetch=FetchType.EAGER)
+    private Set<Card> cards = new HashSet<>();
     public Client() {
     }
 
@@ -32,7 +36,8 @@ public class Client {
 
     }
 
-    // Getters and setters
+
+// Getters and setters
 
     public long getId() {
         return id;
@@ -82,6 +87,14 @@ public class Client {
         this.accounts = accounts;
     }
 
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
     public void addAccount(Account account) {
         this.accounts.add(account);
         account.setClient(this);
@@ -91,6 +104,20 @@ public class Client {
     public void addClientLoan(ClientLoan clientLoan) {
         this.loans.add(clientLoan);
         clientLoan.setClient(this);
+    }
+
+    public Set<Card> getCards() {
+        return cards;
+    }
+
+    public void setCards(Set<Card> cards) {
+        this.cards = cards;
+    }
+
+    public void addCard(Card card){
+        this.cards.add(card);
+        card.setClient(this);
+        card.setClientHolder(this.firstName + " " + this.lastName);
     }
 
     @Override
