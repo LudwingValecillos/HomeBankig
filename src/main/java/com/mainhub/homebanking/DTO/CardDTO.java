@@ -1,10 +1,8 @@
 package com.mainhub.homebanking.DTO;
 
 import com.mainhub.homebanking.models.Card;
-import com.mainhub.homebanking.models.Client;
 import com.mainhub.homebanking.models.type.CardColor;
 import com.mainhub.homebanking.models.type.CardType;
-import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
@@ -15,7 +13,8 @@ public class CardDTO {
 
     private String ClientHolder;
 
-    private int number, cvv;
+    private int cvv;
+    private String number;
 
     private LocalDateTime fromDate, thruDate;
 
@@ -24,7 +23,7 @@ public class CardDTO {
 
     public CardDTO(Card card) {
         this.id = card.getId();
-       this.ClientHolder = card.getClientHolder();
+       this.ClientHolder = card.getCardHolder();
         this.number = card.getNumber();
         this.cvv = card.getCvv();
         this.fromDate = card.getFromDate();
@@ -42,7 +41,7 @@ public class CardDTO {
         return ClientHolder;
     }
 
-    public int getNumber() {
+    public String getNumber() {
         return number;
     }
 

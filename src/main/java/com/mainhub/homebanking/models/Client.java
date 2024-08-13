@@ -1,15 +1,13 @@
 package com.mainhub.homebanking.models;
 
+import com.mainhub.homebanking.models.utils.GenerateNumberCard;
 import jakarta.persistence.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity //Le estamos idicando a spring que genere una tabla en la base de datos
 public class Client {
-    @Id//Indica que va a ser la clave primaria de la clase
+    @Id//Indica que va a ser la clave primaria en la base de datos
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Indica que va a ser una clave primaria autoincremental en la base de datos (1,2,3,4,5...)
     private long id;
     private String firstName;
@@ -98,7 +96,6 @@ public class Client {
     public void addAccount(Account account) {
         this.accounts.add(account);
         account.setClient(this);
-
     }
 
     public void addClientLoan(ClientLoan clientLoan) {
@@ -116,8 +113,10 @@ public class Client {
 
     public void addCard(Card card){
         this.cards.add(card);
+        card.setNumber(new GenerateNumberCard().generateNumber());
         card.setClient(this);
-        card.setClientHolder(this.firstName + " " + this.lastName);
+        card.setCardHolder(this.firstName + " " + this.lastName);
+        card.setCvv(new Random().nextInt((999 - 100) + 1) + 100);
     }
 
     @Override

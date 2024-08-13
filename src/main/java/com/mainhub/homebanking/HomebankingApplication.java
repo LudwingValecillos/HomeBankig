@@ -6,6 +6,7 @@ import com.mainhub.homebanking.models.*;
 import com.mainhub.homebanking.models.type.CardColor;
 import com.mainhub.homebanking.models.type.CardType;
 import com.mainhub.homebanking.models.type.TransactionType;
+import com.mainhub.homebanking.models.utils.GenerateNumberCard;
 import com.mainhub.homebanking.repositories.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -34,7 +35,7 @@ public class HomebankingApplication {
 			LocalDate today = LocalDate.now();
 			LocalDate tomorrow = today.plusDays(1);
 
-			// ***** Cliente Pepe *****
+			// ***** Cliente Ludwing *****
 			Client ludwing = new Client("Ludwing", "Valecillos", "ludwingval@gmail.com");
 			clientRepository.save(ludwing);
 
@@ -107,12 +108,13 @@ public class HomebankingApplication {
 			ClientDTO clientDTO1 = new ClientDTO(ludwing);
 			ClientDTO clientDTO2 = new ClientDTO(melba);
 
-
 			// Crear DTOs de cuentas
 			AccountDTO accountDTO1 = new AccountDTO(cuenta1Pepe);
 			AccountDTO accountDTO2 = new AccountDTO(cuenta2Pepe);
 			AccountDTO accountDTO3 = new AccountDTO(cuenta1Melba);
 			AccountDTO accountDTO4 = new AccountDTO(cuenta2Melba);
+
+
 
 			Loan hipotcario = new Loan("Hipotecario", 500000, Arrays.asList(12, 24, 36, 48, 60));
 			loanRepository.save(hipotcario);
@@ -160,13 +162,13 @@ public class HomebankingApplication {
 
 			//------------------CARDS----------------------
 
-			Card cardLud = new Card(04456515151,952,LocalDateTime.now(),LocalDateTime.now().plusYears(5).plusYears(5), CardType.DEBIT, CardColor.Silver);
+			Card cardLud = new Card(LocalDateTime.now(),LocalDateTime.now().plusYears(5).plusYears(5), CardType.DEBIT, CardColor.Silver);
 
 			ludwing.addCard(cardLud);
 			cardRepository.save(cardLud);
 
-			Card card1 = new Card(04456515151,952,LocalDateTime.now(),LocalDateTime.now().plusYears(5), CardType.DEBIT, CardColor.GOLD);
-			Card card2 = new Card(04456515152,953,LocalDateTime.now(),LocalDateTime.now().plusYears(10), CardType.CREDIT, CardColor.TITANIUM);
+			Card card1 = new Card(LocalDateTime.now(),LocalDateTime.now().plusYears(5), CardType.DEBIT, CardColor.GOLD);
+			Card card2 = new Card(LocalDateTime.now(),LocalDateTime.now().plusYears(10), CardType.CREDIT, CardColor.TITANIUM);
 
 			melba.addCard(card1);
 			melba.addCard(card2);

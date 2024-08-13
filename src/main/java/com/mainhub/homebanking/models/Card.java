@@ -4,7 +4,6 @@ import com.mainhub.homebanking.models.type.CardColor;
 import com.mainhub.homebanking.models.type.CardType;
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,9 +16,11 @@ public class Card {
     @JoinColumn(name = "client_id")
     private Client client;
 
-    private String ClientHolder;
+    private String CardHolder;
 
-    private int number,cvv;
+    private int cvv;
+
+    private String number;
 
     private LocalDateTime fromDate, thruDate;
 
@@ -33,9 +34,8 @@ public class Card {
 
 
 
-    public Card(int number, int cvv, LocalDateTime fromDate, LocalDateTime thruDate, CardType type, CardColor color) {
-        this.number = number;
-        this.cvv = cvv;
+    public Card(LocalDateTime fromDate, LocalDateTime thruDate, CardType type, CardColor color) {
+
         this.fromDate = fromDate;
         this.thruDate = thruDate;
         this.type = type;
@@ -46,7 +46,7 @@ public class Card {
         return id;
     }
 
-    public int getNumber() {
+    public String getNumber() {
         return number;
     }
 
@@ -58,14 +58,14 @@ public class Card {
         this.client = client;
     }
 
-    public String getClientHolder() {
-        return ClientHolder;
+    public String getCardHolder() {
+        return CardHolder;
     }
 
-    public void setClientHolder(String clientHolder) {
-        ClientHolder = clientHolder;
+    public void setCardHolder(String cardHolder) {
+        CardHolder = cardHolder;
     }
-    public void setNumber(int number) {
+    public void setNumber(String number) {
         this.number = number;
     }
 
