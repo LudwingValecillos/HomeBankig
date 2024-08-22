@@ -23,7 +23,7 @@ public class CardDTO {
 
     public CardDTO(Card card) {
         this.id = card.getId();
-       this.ClientHolder = card.getCardHolder();
+        this.ClientHolder = card.getCardHolder();
         this.number = card.getNumber();
         this.cvv = card.getCvv();
         this.fromDate = card.getFromDate();

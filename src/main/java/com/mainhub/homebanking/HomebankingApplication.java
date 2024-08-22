@@ -42,11 +42,15 @@ public class HomebankingApplication {
 			// Crear y guardar cuentas para Pepe
 			Account cuenta1Pepe = new Account("VIN001", today, 500);
 			Account cuenta2Pepe = new Account("VIN002", today, 7500);
+			Account cuenta3Pepe = new Account("VIN019", today, 7500);
+
 			ludwing.addAccount(cuenta1Pepe);
 			ludwing.addAccount(cuenta2Pepe);
+			ludwing.addAccount(cuenta3Pepe);
 
 			accountRepository.save(cuenta1Pepe);
 			accountRepository.save(cuenta2Pepe);
+			accountRepository.save(cuenta3Pepe);
 
 			// Crear y guardar transacciones para la cuenta 1 de Pepe
 			Transaction transaccion1Pepe1 = new Transaction(TransactionType.CREDIT, 200, "Salary", LocalDateTime.now());
@@ -77,10 +81,15 @@ public class HomebankingApplication {
 			// Crear y guardar cuentas para Melba
 			Account cuenta1Melba = new Account("VIN003", today, 10000);
 			Account cuenta2Melba = new Account("VIN004", today, 2000);
+			Account cuenta3Melba = new Account("VIN010", today, 2000);
+
 			melba.addAccount(cuenta1Melba);
 			melba.addAccount(cuenta2Melba);
+			melba.addAccount(cuenta3Melba);
 			accountRepository.save(cuenta1Melba);
 			accountRepository.save(cuenta2Melba);
+			accountRepository.save(cuenta3Melba);
+
 
 			// Crear y guardar transacciones para la cuenta 1 de Melba
 			Transaction transaccion1Melba1 = new Transaction(TransactionType.CREDIT, 5000, "Freelance Work", LocalDateTime.now());
@@ -111,8 +120,10 @@ public class HomebankingApplication {
 			// Crear DTOs de cuentas
 			AccountDTO accountDTO1 = new AccountDTO(cuenta1Pepe);
 			AccountDTO accountDTO2 = new AccountDTO(cuenta2Pepe);
+			AccountDTO accountDTO5 = new AccountDTO(cuenta3Pepe);
 			AccountDTO accountDTO3 = new AccountDTO(cuenta1Melba);
 			AccountDTO accountDTO4 = new AccountDTO(cuenta2Melba);
+			AccountDTO accountDTO6 = new AccountDTO(cuenta3Melba);
 
 
 
@@ -162,7 +173,8 @@ public class HomebankingApplication {
 
 			//------------------CARDS----------------------
 
-			Card cardLud = new Card(LocalDateTime.now(),LocalDateTime.now().plusYears(5).plusYears(5), CardType.DEBIT, CardColor.Silver);
+			Card cardLud = new Card(LocalDateTime.now(),LocalDateTime.now().plusYears(5).plusYears(5), CardType.DEBIT, CardColor.SILVER);
+
 
 			ludwing.addCard(cardLud);
 			cardRepository.save(cardLud);

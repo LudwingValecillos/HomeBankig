@@ -24,6 +24,8 @@ import static java.util.stream.Collectors.toList;
 
 // La ruta base para las solicitudes es "/api/clients".
 
+@CrossOrigin(origins = "http://localhost:5173") // Configuración CORS para este controlador
+
 public class ClientController {
     @Autowired
     //conecta/cablea a la interfaz de clientrepository que esta extiende de jpa repository para utilizar sus metodos, lo que se denomida inyeccion de dependencias.
@@ -36,18 +38,13 @@ public class ClientController {
 
     ////////------------------------------- Servlet --------------------------------------//////////
 
-    //Mapping es lo que se representa en el navegador
+    //Mapping es lo que se representa en el
     @GetMapping("/")
     // Maneja las solicitudes GET a la ruta base "/" para obtener todos los clientes.
     public List<ClientDTO> getAllClients() {
         return clientRepository.findAll().stream().filter(client -> client.isActive()).map(client -> new ClientDTO(client)).collect(toList());
 
-        // .stream() es una operación que devuelve un flujo de datos que puede ser consumido de forma eficiente.
-        //.map(ClientDTO::new) es una operación que aplica una función a cada elemento del flujo de datos y devuelve un nuevo flujo de datos con los resultados.
-        // .collect(toList()) es una operación que convierte el flujo de datos en una lista.
-
     }
-
     @GetMapping("/id={id}")
     // Maneja las solicitudes GET para obtener un cliente por ID.
     public ResponseEntity<ClientDTO> getById(@PathVariable Long id) {
@@ -62,7 +59,6 @@ public class ClientController {
     // Maneja las solicitudes GET para obtener todos los clientes desactivados.
     public List<ClientDTO> getAllClientsDisabled() {
         return clientRepository.findAll().stream().filter(client -> client.isActive() == false).map(client -> new ClientDTO(client)).collect(toList());
-
     }
     @DeleteMapping("/id={id}")
     // Maneja las solicitudes DELETE para eliminar un cliente por ID.
