@@ -16,6 +16,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/** Para esta clase, utilizaremos la anotación @Component,
+ * que la marcará como un componente Spring, permitiendo que sea escaneada
+ * y añadida al contexto como un Bean para ser gestionada por Spring. **/
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 
@@ -25,14 +28,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtilService jwtUtilService; // Servicio para manejar la lógica de JWT (JSON Web Token).
 
+
+
     /**
-     * Filtra solicitudes HTTP para verificar el token JWT.
      *
-     * @param request     La solicitud HTTP.
-     * @param response    La respuesta HTTP.
-     * @param filterChain La cadena de filtros a continuar.
-     * @throws ServletException Si ocurre un error durante el procesamiento.
-     * @throws IOException      Si ocurre un error de entrada/salida.
+     * Al realizar una solicitud a nuestra aplicación,
+     * pasará por SecurityFilterChain, utilizando por defecto el método de autenticación
+     * de nombre de usuario y contraseña (debe estar encriptado). La solicitud luego pasa por el AuthenticationManager,
+     * que autentica nuestras credenciales de acceso. En esta etapa, la autenticación puede o no tener éxito.
+     * Si es favorable, se crea un SecurityContextHolder, que es un objeto en memoria que se mantiene en el contexto
+     * de la aplicación para contener todos los datos del usuario conectado en ese momento.
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -59,7 +64,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
             // Verificar si el nombre de usuario no es nulo y no hay autenticación en el contexto de seguridad.
             //getContext() devuelve el contexto de seguridad actual.
-            //SecurityContextHolder asegura que no haya una autenticación en el contexto de seguridad.
+            //SecurityContextHolder verifica si no hay un usuario autenticado en el contexto de seguridad.
 
             if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
@@ -74,7 +79,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                             userDetails, null, userDetails.getAuthorities()
                     );
 
-                    // Establecer los detalles de autenticación en el objeto de autenticación.
+                    /**
+                     * new WebAuthenticationDetailsSource(): Esta es una clase de Spring Security
+                     * que se encarga de crear detalles de autenticación específicos para la solicitud HTTP actual.
+                     */
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     // Establecer la autenticación en el contexto de seguridad.
                     SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -89,4 +97,15 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         }
     }
+    /**
+     * Contexto en el Código Proporcionado
+     * En el código que proporcionaste, esta línea se ejecuta después de que se verifica que el token JWT es válido y
+     * que no ha expirado. Se carga la información del usuario (UserDetails) asociado con el token JWT y se crea un
+     * objeto UsernamePasswordAuthenticationToken para representar la autenticación del usuario.
+     *
+     * Luego, se establecen los detalles adicionales de la solicitud utilizando WebAuthenticationDetailsSource.
+     * Finalmente, esta autenticación se establece en el SecurityContextHolder, lo que permite que la aplicación reconozca al
+     * usuario autenticado para las solicitudes posteriores.
+     */
 }
+

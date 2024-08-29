@@ -26,11 +26,13 @@ public class WebConfig {
     private CorsConfigurationSource corsConfigurationSource; // Fuente de configuración para CORS (Cross-Origin Resource Sharing).
 
     /**
-     * Configura la cadena de filtros de seguridad para la aplicación.
-     *
-     * @param httpSecurity Configuración de seguridad HTTP.
-     * @return La configuración de seguridad construida.
-     * @throws Exception Si ocurre algún error durante la configuración.
+     * Dentro de nuestra aplicación tendremos
+     * que realizar ciertas configuraciones
+     * para gestionar la autorización. SecurityFilterChain utiliza la
+     * autenticación basada en los datos que tiene SecurityContextHolder,
+     * pasando esos datos al Administrador para determinar en función de los datos si estoy
+     * autorizado o no a consumir el recurso al que se accede (puede depender de alguna propiedad
+     * del usuario objeto del contexto, como un ROLE).
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -56,11 +58,17 @@ public class WebConfig {
                                 // Permite el acceso sin autenticación a las rutas especificadas (login, registro, y consola H2).
                                 .requestMatchers("/api/auth/login", "/api/auth/register", "/h2-console/**").permitAll()
 
-                                .requestMatchers("/api/auth/current").hasRole("CLIENT")
+                                .requestMatchers("/api/auth/current", "/api/clients/test").hasRole("CLIENT")
 
                 )
 
                 // Agrega el filtro JWT antes del filtro de autenticación por nombre de usuario y contraseña.
+
+                /**
+                 * Filtro JWT: Se agrega un filtro personalizado (JwtRequestFilter) antes del filtro de autenticación de
+                 * nombre de usuario y contraseña. Este filtro maneja las solicitudes entrantes para validar y procesar tokens JWT.
+                 */
+
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 // Configura la política de creación de sesiones como sin estado (stateless), sin crear sesiones en el servidor.
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

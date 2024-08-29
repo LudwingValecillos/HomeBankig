@@ -48,6 +48,7 @@ public class JwtUtilService {
 
     // Crea un nuevo token JWT con los claims y el nombre de usuario proporcionados
     private String createToken(Map<String, Object> claims, String username) {
+        System.out.println("Clave secreta utilizada para firmar los tokens JWT: " + SECRET_KEY);
         return Jwts.builder()
                 .claims(claims)
                 .setSubject(username)

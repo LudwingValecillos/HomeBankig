@@ -65,6 +65,7 @@ public class AuthController {
             // Retorna el token JWT en la respuesta.
             return ResponseEntity.ok(jwt);
         } catch (Exception e) {
+
             e.printStackTrace(); // Muestra cualquier excepción que ocurra.
             // Retorna un error si la autenticación falla.
             return new ResponseEntity<>("Email or password invalid", HttpStatus.BAD_REQUEST);
