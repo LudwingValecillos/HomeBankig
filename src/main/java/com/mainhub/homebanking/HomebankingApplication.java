@@ -8,10 +8,12 @@ import com.mainhub.homebanking.models.type.CardType;
 import com.mainhub.homebanking.models.type.TransactionType;
 import com.mainhub.homebanking.models.utils.GenerateNumberCard;
 import com.mainhub.homebanking.repositories.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,6 +21,9 @@ import java.util.Arrays;
 
 @SpringBootApplication
 public class HomebankingApplication {
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	public static void main(String[] args) {
 		SpringApplication.run(HomebankingApplication.class, args);
@@ -36,7 +41,7 @@ public class HomebankingApplication {
 			LocalDate tomorrow = today.plusDays(1);
 
 			// ***** Cliente Ludwing *****
-			Client ludwing = new Client("Ludwing", "Valecillos", "ludwingval@gmail.com");
+			Client ludwing = new Client("Ludwing", "Valecillos", "ludwingval@gmail.com", passwordEncoder.encode("123"));
 			clientRepository.save(ludwing);
 
 			// Crear y guardar cuentas para Pepe
@@ -75,7 +80,7 @@ public class HomebankingApplication {
 			transactionRepository.save(transaccion3Pepe2);
 
 			// *****------------------------------ Cliente Melba --------------------------------*****
-			Client melba = new Client("Melba", "Morel", "melba@mindhub.com");
+			Client melba = new Client("Melba", "Morel", "melba@mindhub.com", passwordEncoder.encode("123"));
 			clientRepository.save(melba);
 
 			// Crear y guardar cuentas para Melba

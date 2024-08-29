@@ -2,6 +2,7 @@ package com.mainhub.homebanking.models;
 
 import com.mainhub.homebanking.models.utils.GenerateNumberCard;
 import jakarta.persistence.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.*;
 
@@ -16,6 +17,8 @@ public class Client {
 
     private boolean active = true;
 
+    private String password;
+
     @OneToMany(mappedBy="client", fetch=FetchType.EAGER)
     private Set<Account> accounts = new HashSet<>();
 
@@ -27,11 +30,11 @@ public class Client {
     public Client() {
     }
 
-    public Client(String firstName, String lastName, String email) {
+    public Client(String firstName, String lastName, String email, String password) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-
+        this.password = password;
     }
 
 
@@ -85,12 +88,29 @@ public class Client {
         this.accounts = accounts;
     }
 
+
+    public boolean isActive() {
+        return active;
+    }
+
     public void setActive(boolean active) {
         this.active = active;
     }
 
-    public boolean isActive() {
-        return active;
+    public Set<Card> getCards() {
+        return cards;
+    }
+
+    public void setCards(Set<Card> cards) {
+        this.cards = cards;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public void addAccount(Account account) {
@@ -103,13 +123,7 @@ public class Client {
         clientLoan.setClient(this);
     }
 
-    public Set<Card> getCards() {
-        return cards;
-    }
 
-    public void setCards(Set<Card> cards) {
-        this.cards = cards;
-    }
 
     public void addCard(Card card){
         this.cards.add(card);

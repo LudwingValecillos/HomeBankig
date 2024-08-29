@@ -9,6 +9,7 @@ import com.mainhub.homebanking.repositories.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -24,7 +25,7 @@ import static java.util.stream.Collectors.toList;
 
 // La ruta base para las solicitudes es "/api/clients".
 
-@CrossOrigin(origins = "http://localhost:5173") // Configuración CORS para este controlador
+//@CrossOrigin(origins = "http://localhost:5173") // Configuración CORS para este controlador
 
 public class ClientController {
     @Autowired
@@ -33,7 +34,6 @@ public class ClientController {
 
     @Autowired
     private AccountRepository accountRepository;
-    static private int num = 7;
     // Inyección de dependencias para el repositorio de clientes.
 
     ////////------------------------------- Servlet --------------------------------------//////////
@@ -69,25 +69,25 @@ public class ClientController {
         return ResponseEntity.ok("Client desactived");
     }
 
-    @PostMapping("/create")
-    // Maneja las solicitudes POST para crear un nuevo cliente.
-    public ResponseEntity<ClientDTO> agregarClient(@RequestParam String email, @RequestParam String firstName, @RequestParam String lastName) {
-        Client client = new Client(firstName, lastName, email);
-
-
-        ClientDTO clientDTO = new ClientDTO(clientRepository.save(client));
-
-//        String numero = "VIN00"+ String.valueOf(this.num);
-
-        Account account = new Account( "VIN00"+ String.valueOf(this.num), LocalDate.now(), 0);
-        this.num = this.num + 1;
-
-        client.addAccount(account);
-        AccountDTO accountDTO = new AccountDTO(accountRepository.save(account));
-
-
-        return ResponseEntity.ok(clientDTO);
-    }
+//    @PostMapping("/create")
+//    // Maneja las solicitudes POST para crear un nuevo cliente.
+//    public ResponseEntity<ClientDTO> agregarClient(@RequestParam String email, @RequestParam String firstName, @RequestParam String lastName) {
+//        Client client = new Client(firstName, lastName, email);
+//
+//
+//        ClientDTO clientDTO = new ClientDTO(clientRepository.save(client));
+//
+////        String numero = "VIN00"+ String.valueOf(this.num);
+//
+//        Account account = new Account( "VIN00"+ String.valueOf(this.num), LocalDate.now(), 0);
+//        this.num = this.num + 1;
+//
+//        client.addAccount(account);
+//        AccountDTO accountDTO = new AccountDTO(accountRepository.save(account));
+//
+//
+//        return ResponseEntity.ok(clientDTO);
+//    }
 
     @PutMapping("/update/{id}")
     // Maneja las solicitudes PUT para actualizar un cliente existente.
@@ -142,5 +142,11 @@ public class ClientController {
     //
     public String getClients() {
         return "Hello Clientes, me gusta el pan";
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<?> test (Authentication authentication){
+        String email = authentication.getName();
+        return ResponseEntity.ok("Hello"+ email);
     }
 }
