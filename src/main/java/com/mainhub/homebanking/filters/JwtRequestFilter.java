@@ -16,96 +16,66 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-/** Para esta clase, utilizaremos la anotación @Component,
- * que la marcará como un componente Spring, permitiendo que sea escaneada
- * y añadida al contexto como un Bean para ser gestionada por Spring. **/
+/**
+ * Filtro que intercepta cada petición HTTP y verifica la autenticación JWT.
+ * Si el token es válido, establece el contexto de seguridad para permitir el acceso a recursos protegidos.
+ */
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Autowired
-    private UserDetailsService userDetailsService; // Servicio para cargar detalles del usuario.
+    private UserDetailsService userDetailsService;
 
     @Autowired
-    private JwtUtilService jwtUtilService; // Servicio para manejar la lógica de JWT (JSON Web Token).
+    private JwtUtilService jwtUtilService;
 
-
-
-    /**
-     *
-     * Al realizar una solicitud a nuestra aplicación,
-     * pasará por SecurityFilterChain, utilizando por defecto el método de autenticación
-     * de nombre de usuario y contraseña (debe estar encriptado). La solicitud luego pasa por el AuthenticationManager,
-     * que autentica nuestras credenciales de acceso. En esta etapa, la autenticación puede o no tener éxito.
-     * Si es favorable, se crea un SecurityContextHolder, que es un objeto en memoria que se mantiene en el contexto
-     * de la aplicación para contener todos los datos del usuario conectado en ese momento.
-     */
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
-
-        // Variables para el nombre de usuario y el token JWT.
-        String userName = null;
-        String jwt = null;
-
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
-
-            // Obtener el encabezado de autorización de la solicitud.
-            final String authorizationHeader = request.getHeader("Authorization");
-
-            // Verificar si el encabezado es válido y contiene el prefijo "Bearer ".
+            // Extrae el token JWT del encabezado de autorización de la petición
+            String authorizationHeader = request.getHeader("Authorization");
+            String jwtToken = null;
+            String username = null;
 
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-                // Extraer el token JWT del encabezado.
-                jwt = authorizationHeader.substring(7);
-                // Extraer el nombre de usuario del token JWT.
-                userName = jwtUtilService.extractUserName(jwt);
-                System.out.println("Correo extraido del token: " + userName);
+                jwtToken = authorizationHeader.substring(7);
+                username = jwtUtilService.extractUserName(jwtToken);
             }
 
-            // Verificar si el nombre de usuario no es nulo y no hay autenticación en el contexto de seguridad.
-            //getContext() devuelve el contexto de seguridad actual.
-            //SecurityContextHolder verifica si no hay un usuario autenticado en el contexto de seguridad.
+            // Si hay un usuario y no hay una autenticación establecida en el contexto de seguridad
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                // Carga los detalles del usuario (roles, permisos) a partir del nombre de usuario
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
-            if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                // Verifica que el token no haya expirado
+                if (!jwtUtilService.isTokenExpired(jwtToken)) {
 
-                // Cargar los detalles del usuario basado en el nombre de usuario.
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userName);
-
-                // Verificar si el token JWT no ha expirado.
-                if (!jwtUtilService.isTokenExpired(jwt)) {
-                    // Crear objeto de autenticación con los detalles del usuario y sus autoridades.
+                    // Se crea un objeto Authentication que representa al usuario autenticado y se establece en el contexto de seguridad de Spring Security.
+                    //Esta autenticación se establece en el contexto de seguridad de Spring Security y contiene información sobre el usuario y sus permisos.
+                    //Se define null las credenciales ya que vamos a trabajr con la autenticacion a traves de un token.
 
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities()
                     );
 
-                    /**
-                     * new WebAuthenticationDetailsSource(): Esta es una clase de Spring Security
-                     * que se encarga de crear detalles de autenticación específicos para la solicitud HTTP actual.
-                     */
+
+                    //De la autenticacion se le setea los detalles
+                    //Se crea un objeto WebAuthenticationDetailsSource que se utiliza para obtener la información de la solicitud HTTP.
+                    //Llamamos a su metodo (el unico que tiene) buildDetails con el que vmaos a crear y establecer los talles a la
+                    // autenticacion basados en la peticion proporcionada
+
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    // Establecer la autenticación en el contexto de seguridad.
+
+                    //Establecemos la autenticación del usuario actual, para gestionar la autenticacion y la autorización del usuario.
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }
-
         } catch (Exception e) {
-            // Manejar excepciones (para producción, usar un logger).
-            System.out.println(e.getMessage());
+            // Maneja cualquier excepción que pueda ocurrir durante el proceso de autenticación
+            System.out.println("Error en el filtro JWT: " + e.getMessage());
         } finally {
-            // Continuar con la cadena de filtros.
+            // Lo recibimos por parametros y llamamos al metodo doFilter para que continue con la siguiente cadena de filtros
             filterChain.doFilter(request, response);
         }
     }
-    /**
-     * Contexto en el Código Proporcionado
-     * En el código que proporcionaste, esta línea se ejecuta después de que se verifica que el token JWT es válido y
-     * que no ha expirado. Se carga la información del usuario (UserDetails) asociado con el token JWT y se crea un
-     * objeto UsernamePasswordAuthenticationToken para representar la autenticación del usuario.
-     *
-     * Luego, se establecen los detalles adicionales de la solicitud utilizando WebAuthenticationDetailsSource.
-     * Finalmente, esta autenticación se establece en el SecurityContextHolder, lo que permite que la aplicación reconozca al
-     * usuario autenticado para las solicitudes posteriores.
-     */
 }
-

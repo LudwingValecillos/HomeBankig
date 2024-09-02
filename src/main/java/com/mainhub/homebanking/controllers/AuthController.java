@@ -27,40 +27,48 @@ import java.time.LocalDate;
 public class AuthController {
 
     @Autowired
-    private PasswordEncoder passwordEncoder; // Codificador de contraseñas para encriptar y verificar contraseñas.
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private ClientRepository clientRepository; // Repositorio para manejar operaciones CRUD de clientes.
+    private ClientRepository clientRepository;
 
     @Autowired
-    private AccountRepository accountRepository; // Repositorio para manejar operaciones CRUD de cuentas.
+    private AccountRepository accountRepository;
 
     @Autowired
-    private AuthenticationManager authenticationManager; // Administrador de autenticación para manejar el proceso de autenticación.
+    private AuthenticationManager authenticationManager;
 
     @Autowired
-    private UserDetailsService userDetailsService; // Servicio para cargar los detalles del usuario.
+    private UserDetailsService userDetailsService;
 
     @Autowired
-    private JwtUtilService jwtUtilService; // Servicio para manejar la generación y validación de JWT (JSON Web Tokens).
+    private JwtUtilService jwtUtilService;
 
-    static private int num = 007; // Contador para generar identificadores únicos para las cuentas.
+    static private int num = 007;
 
     // Endpoint para iniciar sesión y generar un token JWT.
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
         try {
-            System.out.println("Login attempt for: " + loginDTO.email()); // Registra el intento de inicio de sesión.
 
+            //authenticate es validar las credenciales. Spring Security se encargará de realizar esta validación,
+            // por ejemplo, consultando una base de datos de usuarios para verificar si el email y la contraseña coinciden con un usuario registrado.
+
+            /**
+             Cuando un usuario intenta iniciar sesión (endpoint /login), se crea un objeto Authentication con las credenciales proporcionadas (email y contraseña).
+             Este objeto se pasa al AuthenticationManager para su validación.
+             Si las credenciales son válidas, se crea un nuevo objeto Authentication que representa al usuario
+             autenticado y se establece en el contexto de seguridad de Spring Security.
+             */
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginDTO.email(), loginDTO.password()));
 
 
             final UserDetails userDetails = userDetailsService.loadUserByUsername(loginDTO.email());
 
-            //
+
             final String jwt = jwtUtilService.generateToken(userDetails);
-            System.out.println("JWT generated: " + jwt); // Registra el token generado.
+
 
             // Retorna el token JWT en la respuesta.
             return ResponseEntity.ok(jwt);
@@ -75,7 +83,8 @@ public class AuthController {
     // Endpoint para registrar un nuevo cliente.
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterDTO registerDTO) {
-        // Verifica si el email ya está registrado en la base de datos.
+
+
         if (clientRepository.findByEmail(registerDTO.email()) != null) {
             return new ResponseEntity<>("Email already exists", HttpStatus.BAD_REQUEST);
         }
@@ -115,9 +124,10 @@ public class AuthController {
         return new ResponseEntity<>("Client registered successfully", HttpStatus.CREATED);
     }
 
-    // Endpoint para obtener los detalles del cliente autenticado.
+    //El objeto Authentication proporciona información sobre el usuario actualmente autenticado, como su nombre de usuario, roles, y otros atributos.
     @GetMapping("/current")
     public ResponseEntity<?> getClient(Authentication authentication) {
+
         // Obtiene el cliente basado en el nombre de usuario autenticado.
         Client client = clientRepository.findByEmail(authentication.getName());
 

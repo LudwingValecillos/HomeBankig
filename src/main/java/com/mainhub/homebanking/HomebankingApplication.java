@@ -86,14 +86,14 @@ public class HomebankingApplication {
 			// Crear y guardar cuentas para Melba
 			Account cuenta1Melba = new Account("VIN003", today, 10000);
 			Account cuenta2Melba = new Account("VIN004", today, 2000);
-			Account cuenta3Melba = new Account("VIN010", today, 2000);
+//			Account cuenta3Melba = new Account("VIN010", today, 2000);
 
 			melba.addAccount(cuenta1Melba);
 			melba.addAccount(cuenta2Melba);
-			melba.addAccount(cuenta3Melba);
+//			melba.addAccount(cuenta3Melba);
 			accountRepository.save(cuenta1Melba);
 			accountRepository.save(cuenta2Melba);
-			accountRepository.save(cuenta3Melba);
+//			accountRepository.save(cuenta3Melba);
 
 
 			// Crear y guardar transacciones para la cuenta 1 de Melba
@@ -128,7 +128,7 @@ public class HomebankingApplication {
 			AccountDTO accountDTO5 = new AccountDTO(cuenta3Pepe);
 			AccountDTO accountDTO3 = new AccountDTO(cuenta1Melba);
 			AccountDTO accountDTO4 = new AccountDTO(cuenta2Melba);
-			AccountDTO accountDTO6 = new AccountDTO(cuenta3Melba);
+//			AccountDTO accountDTO6 = new AccountDTO(cuenta3Melba);
 
 
 

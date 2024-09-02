@@ -10,30 +10,24 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
+//Implementamos la logica de la interfaz UserDetailsService
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    // Repositorio para acceder a los datos de los clientes.
+    //Inyectamos el repositorio de clientes
     @Autowired
     private ClientRepository clientRepository;
 
-    /**
-     * Carga los detalles del usuario basado en el nombre de usuario (correo electrónico en este caso).
-     *
-     * @param username El correo electrónico del cliente.
-     * @return Un objeto UserDetails con la información del cliente.
-     * @throws UsernameNotFoundException Si no se encuentra un cliente con el correo proporcionado.
-     */
+    //Implementamos el metodo
+    //Metodo de la interfaz que estamos sobrescribiendo
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Busca el cliente en el repositorio usando el correo electrónico.
+        //Se busca el cliente para autenticarlo
         Client client = clientRepository.findByEmail(username);
 
-        // Lanza una excepción si no se encuentra el cliente.
         if (client == null) {
             throw new UsernameNotFoundException(username);
         }
 
-        // Asigna rol ADMIN si el correo electrónico contiene "admin".
         if (username.contains("admin")) {
             return User.withUsername(username)
                     .password(client.getPassword())
@@ -41,10 +35,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                     .build();
         }
 
-        // Crea y retorna un objeto UserDetails para clientes normales.
         return User.withUsername(username)
                 .password(client.getPassword())
                 .roles("CLIENT")
                 .build();
+
+        //Retorna al usuario que queremos en el contexHolder
+        //Esta clase lo que quiero hacer es agarrar un cliente y ponerlo en el contexto de mi aplicacion
     }
 }

@@ -20,82 +20,73 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class WebConfig {
 
     @Autowired
-    private JwtRequestFilter jwtRequestFilter; // Filtro personalizado para manejar la autenticación JWT.
+    private JwtRequestFilter jwtRequestFilter;
 
     @Autowired
-    private CorsConfigurationSource corsConfigurationSource; // Fuente de configuración para CORS (Cross-Origin Resource Sharing).
+    private CorsConfigurationSource corsConfigurationSource;
 
-    /**
-     * Dentro de nuestra aplicación tendremos
-     * que realizar ciertas configuraciones
-     * para gestionar la autorización. SecurityFilterChain utiliza la
-     * autenticación basada en los datos que tiene SecurityContextHolder,
-     * pasando esos datos al Administrador para determinar en función de los datos si estoy
-     * autorizado o no a consumir el recurso al que se accede (puede depender de alguna propiedad
-     * del usuario objeto del contexto, como un ROLE).
-     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        //Recibe un HttpSecurity como argumento y devuelve un SecurityFilterChain.
+        //Que se encarga de configurar la seguridad de la aplicación.
 
         httpSecurity
-                // Configuración de CORS utilizando la fuente de configuración proporcionada.
+                //Definiendo la configuración de CORS
+
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
-                // Desactiva la protección CSRF (Cross-Site Request Forgery) (CSRF es un ataque de fuerza bruta que se utiliza para falsificar la autenticación).
+
+                //Cross-Site Request Forgery, o Falsificación de Petición en Sitios Cruzados.
+
+                //Se desactiva porque no se utiliza el inisio de sesión si no mediante tokens por cada solicitud
+                //Pero como trabajamos con un frontend se desactiva asi no se fija si la peticion vino de un formulario
                 .csrf(AbstractHttpConfigurer::disable)
-                // Desactiva la autenticación básica HTTP.
+
+                //Se desactiva la configuración de Basic que proporciona Spring Security
+                //No es seguro ya que las credenciales de usuario son sensibles y viajan sin protección
                 .httpBasic(AbstractHttpConfigurer::disable)
-                // Desactiva el formulario de inicio de sesión.
                 .formLogin(AbstractHttpConfigurer::disable)
 
-                // Configura los encabezados de seguridad, desactivando la protección contra marcos (frame options).
+                //Se desactiva la configuración de los encabezados
+                //si deseas permitir que otras aplicaciones se incrusten en la tuya.
+                //Se desactiva ya que utilizamos el h2-console para interactuar con la base de datos ya que es embebida en la app
                 .headers(httpSecurityHeadersConfigurer -> httpSecurityHeadersConfigurer.frameOptions(
                         HeadersConfigurer.FrameOptionsConfig::disable))
-
-                // Configura las reglas de autorización para las solicitudes HTTP.
                 .authorizeHttpRequests(authorize ->
                         authorize
-                                .requestMatchers("/api/clients/", "/api/clients/**", "/api/accounts/", "/api/accounts/**").hasRole("ADMIN")
-                                // Permite el acceso sin autenticación a las rutas especificadas (login, registro, y consola H2).
-                                .requestMatchers("/api/auth/login", "/api/auth/register", "/h2-console/**").permitAll()
-
-                                .requestMatchers("/api/auth/current", "/api/clients/test").hasRole("CLIENT")
-
+                                .requestMatchers("/api/current", "/api/accounts/clients/current/accounts", "/api/cards/clients/current/cards").hasRole("CLIENT")
+                                .requestMatchers("/api/clients/", "/api/clients/**", "/api/accounts/", "/api/accounts/**","h2-console/**", "/api/cards/", "/api/cards/**").hasRole("ADMIN")
+                                .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                                .anyRequest().authenticated()
                 )
 
-                // Agrega el filtro JWT antes del filtro de autenticación por nombre de usuario y contraseña.
-
-                /**
-                 * Filtro JWT: Se agrega un filtro personalizado (JwtRequestFilter) antes del filtro de autenticación de
-                 * nombre de usuario y contraseña. Este filtro maneja las solicitudes entrantes para validar y procesar tokens JWT.
-                 */
-
+                //Se agrega el filtro de autenticación antes del filtro de autenticación de recursos
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
-                // Configura la política de creación de sesiones como sin estado (stateless), sin crear sesiones en el servidor.
+
+                //Se establece la politica de inicio de sesión como STATELESS ya que no se requiere una sesión
+                //Se maneja la autenticación por medio de tokens que esta presente por cada peticion
+
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        // Construye y retorna la configuración de seguridad.
+        //Se retorna la configuración y se construye la configuracion de la cadena de seguridad
         return httpSecurity.build();
     }
 
-    /**
-     * Configura un codificador de contraseñas utilizando BCrypt para el almacenamiento seguro de contraseñas.
-     *
-     * @return Un codificador de contraseñas BCrypt.
-     */
+
     @Bean
     PasswordEncoder passwordEncoder() {
+        // Crea un bean que utiliza el algoritmo BCrypt para cifrar contraseñas de forma segura.
+        // BCrypt es un algoritmo de hash unidireccional que genera una representación encriptada de la contraseña,
+        // haciendo imposible recuperar la contraseña original.
+        // Este cifrado se utiliza principalmente al registrar nuevos usuarios para proteger sus credenciales.
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * Configura un AuthenticationManager utilizando la configuración de autenticación proporcionada.
-     *
-     * @param authenticationConfiguration Configuración de autenticación.
-     * @return El AuthenticationManager configurado.
-     * @throws Exception Si ocurre algún error durante la configuración.
-     */
+
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        //Este bean es el encargado de la autenticación de los usuarios una vez que se vayan logeando
+
+
         return authenticationConfiguration.getAuthenticationManager();
     }
 }

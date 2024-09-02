@@ -6,10 +6,12 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ClientRepository extends JpaRepository<Client, Long> {
-    //    ch.qos.logback.core.net.server.Client findByEmail(String username);
-    Client findByEmail(String email);
 
-    // Long es el tipo de dato de la clave primaria, Alumno es el tipo de dato de la clase.
+    //Jpa nos permite declarar metodos que nos permitan interactuar con la base de datos.
+
+    //Jpa revisa todas las propiedades de Client y tiene que condicionar con el nombre del metodo
+    Client findByEmail(String email);
+    //Devuelve el cliente que coincide con el email proporcionado.
 
     //JPA Repository es la interfaz que nos permite interactuar con la base de datos que lo implementa hibernate/jpa.
 
