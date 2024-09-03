@@ -13,10 +13,10 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     Account findByNumber(String number);
 
+
+
     List<Account> findByClient(Client client);
 
-    Account existsByNumber(String number);
+    boolean existsByNumber( String number);
 
-    @Query("SELECT COALESCE(MAX(CAST(SUBSTRING(a.number, LENGTH(:prefix) + 1) AS int)), 0) FROM Account a WHERE a.number LIKE CONCAT(:prefix, '%')")
-    int findMaxAccountNumberByPrefix(String prefix);
 }

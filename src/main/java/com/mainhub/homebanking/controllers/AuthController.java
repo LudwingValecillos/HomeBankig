@@ -6,6 +6,7 @@ import com.mainhub.homebanking.DTO.LoginDTO;
 import com.mainhub.homebanking.DTO.RegisterDTO;
 import com.mainhub.homebanking.models.Account;
 import com.mainhub.homebanking.models.Client;
+import com.mainhub.homebanking.models.utils.GenerateNumber;
 import com.mainhub.homebanking.repositories.AccountRepository;
 import com.mainhub.homebanking.repositories.ClientRepository;
 import com.mainhub.homebanking.servicesSecurity.JwtUtilService;
@@ -44,15 +45,14 @@ public class AuthController {
     @Autowired
     private JwtUtilService jwtUtilService;
 
-    static private int num = 007;
+    @Autowired
+    private GenerateNumber num;
+
 
     // Endpoint para iniciar sesión y generar un token JWT.
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
         try {
-
-            //authenticate es validar las credenciales. Spring Security se encargará de realizar esta validación,
-            // por ejemplo, consultando una base de datos de usuarios para verificar si el email y la contraseña coinciden con un usuario registrado.
 
             /**
              Cuando un usuario intenta iniciar sesión (endpoint /login), se crea un objeto Authentication con las credenciales proporcionadas (email y contraseña).
@@ -60,6 +60,7 @@ public class AuthController {
              Si las credenciales son válidas, se crea un nuevo objeto Authentication que representa al usuario
              autenticado y se establece en el contexto de seguridad de Spring Security.
              */
+
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginDTO.email(), loginDTO.password()));
 
@@ -70,8 +71,8 @@ public class AuthController {
             final String jwt = jwtUtilService.generateToken(userDetails);
 
 
-            // Retorna el token JWT en la respuesta.
             return ResponseEntity.ok(jwt);
+
         } catch (Exception e) {
 
             e.printStackTrace(); // Muestra cualquier excepción que ocurra.
@@ -84,12 +85,12 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterDTO registerDTO) {
 
-
         if (clientRepository.findByEmail(registerDTO.email()) != null) {
             return new ResponseEntity<>("Email already exists", HttpStatus.BAD_REQUEST);
         }
 
         // Verifica si el nombre y apellido no están vacíos.
+
         if (registerDTO.firstName().isBlank() || registerDTO.lastName().isBlank()) {
             return new ResponseEntity<>("First name and last name cannot be empty", HttpStatus.BAD_REQUEST);
         }
@@ -99,9 +100,6 @@ public class AuthController {
             return new ResponseEntity<>("Password must be at least 8 characters long", HttpStatus.BAD_REQUEST);
         }
 
-        // Codifica la contraseña antes de almacenarla.
-//        String encodedPassword = passwordEncoder.encode(registerDTO.password());
-
         // Crea un nuevo cliente con la información proporcionada.
         Client newClient = new Client(registerDTO.firstName(), registerDTO.lastName(), registerDTO.email(), passwordEncoder.encode(registerDTO.password()));
 
@@ -109,8 +107,7 @@ public class AuthController {
         ClientDTO clientDTO = new ClientDTO(clientRepository.save(newClient));
 
         // Crea una nueva cuenta para el cliente.
-        Account account = new Account("VIN-" + String.valueOf(this.num), LocalDate.now(), 0);
-        this.num += 1;
+        Account account = new Account(num.generateAccountNumber(), LocalDate.now(), 0);
 
         // Asocia la cuenta al cliente.
         newClient.addAccount(account);
@@ -123,6 +120,7 @@ public class AuthController {
         // Retorna una respuesta exitosa con un mensaje de confirmación.
         return new ResponseEntity<>("Client registered successfully", HttpStatus.CREATED);
     }
+
 
     //El objeto Authentication proporciona información sobre el usuario actualmente autenticado, como su nombre de usuario, roles, y otros atributos.
     @GetMapping("/current")

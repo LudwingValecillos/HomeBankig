@@ -44,7 +44,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
             // Si hay un usuario y no hay una autenticación establecida en el contexto de seguridad
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
                 // Carga los detalles del usuario (roles, permisos) a partir del nombre de usuario
+
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
                 // Verifica que el token no haya expirado
@@ -71,8 +73,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            // Maneja cualquier excepción que pueda ocurrir durante el proceso de autenticación
+
             System.out.println("Error en el filtro JWT: " + e.getMessage());
+
         } finally {
             // Lo recibimos por parametros y llamamos al metodo doFilter para que continue con la siguiente cadena de filtros
             filterChain.doFilter(request, response);

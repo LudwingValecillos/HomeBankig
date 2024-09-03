@@ -14,14 +14,14 @@ public class CorsConfig {
 
     //COMPARTIR RECURSOS Y ORIGENES CRUZADOS, para asi restringir solicitudes de dominion diferente para lo que fue creada la app
     //Este código de configuración define las reglas de CORS (Cross-Origin Resource Sharing) para una aplicación Spring Boot.
-// Estas reglas controlan qué orígenes pueden hacer solicitudes a la aplicación y qué métodos y encabezados están permitidos.
+    // Estas reglas controlan qué orígenes pueden hacer solicitudes a la aplicación y qué métodos y encabezados están permitidos.
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         //Instancia del objeto para asi hacerles modificaciones
         CorsConfiguration configuration = new CorsConfiguration();
 
         //Se establecen las rutas permitidas, que nos pueden pegar a nuestra app
-        configuration.setAllowedOrigins(io.jsonwebtoken.lang.Arrays.asList(new String[]{"http://localhost:3000", "http://localhost:5173"}));
+        configuration.setAllowedOrigins(io.jsonwebtoken.lang.Arrays.asList(new String[]{"http://localhost:8080", "http://localhost:5173"}));
 
         //Se establecen los métodos HTTP permitidos utilizando
         configuration.setAllowedMethods(Arrays.asList(new String[]{"GET", "POST", "PUT", "DELETE"}));

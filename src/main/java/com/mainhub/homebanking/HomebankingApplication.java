@@ -6,7 +6,7 @@ import com.mainhub.homebanking.models.*;
 import com.mainhub.homebanking.models.type.CardColor;
 import com.mainhub.homebanking.models.type.CardType;
 import com.mainhub.homebanking.models.type.TransactionType;
-import com.mainhub.homebanking.models.utils.GenerateNumberCard;
+import com.mainhub.homebanking.models.utils.GenerateNumber;
 import com.mainhub.homebanking.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -21,6 +21,9 @@ import java.util.Arrays;
 
 @SpringBootApplication
 public class HomebankingApplication {
+
+	@Autowired
+	private GenerateNumber num;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -45,9 +48,9 @@ public class HomebankingApplication {
 			clientRepository.save(ludwing);
 
 			// Crear y guardar cuentas para Pepe
-			Account cuenta1Pepe = new Account("VIN001", today, 500);
-			Account cuenta2Pepe = new Account("VIN002", today, 7500);
-			Account cuenta3Pepe = new Account("VIN019", today, 7500);
+			Account cuenta1Pepe = new Account(num.generateAccountNumber(), today, 500);
+			Account cuenta2Pepe = new Account(num.generateAccountNumber(), today, 7500);
+			Account cuenta3Pepe = new Account(num.generateAccountNumber(), today, 7500);
 
 			ludwing.addAccount(cuenta1Pepe);
 			ludwing.addAccount(cuenta2Pepe);
@@ -58,9 +61,9 @@ public class HomebankingApplication {
 			accountRepository.save(cuenta3Pepe);
 
 			// Crear y guardar transacciones para la cuenta 1 de Pepe
-			Transaction transaccion1Pepe1 = new Transaction(TransactionType.CREDIT, 200, "Salary", LocalDateTime.now());
-			Transaction transaccion2Pepe1 = new Transaction(TransactionType.DEBIT, -100, "Groceries", LocalDateTime.now());
-			Transaction transaccion3Pepe1 = new Transaction(TransactionType.DEBIT, -50, "Utilities", LocalDateTime.now());
+			Transaction transaccion1Pepe1 = new Transaction(TransactionType.CREDIT, 200, "Salary");
+			Transaction transaccion2Pepe1 = new Transaction(TransactionType.DEBIT, -100, "Groceries");
+			Transaction transaccion3Pepe1 = new Transaction(TransactionType.DEBIT, -50, "Utilities");
 			cuenta1Pepe.addTransaction(transaccion1Pepe1);
 			cuenta1Pepe.addTransaction(transaccion2Pepe1);
 			cuenta1Pepe.addTransaction(transaccion3Pepe1);
@@ -69,9 +72,9 @@ public class HomebankingApplication {
 			transactionRepository.save(transaccion3Pepe1);
 
 			// Crear y guardar transacciones para la cuenta 2 de Pepe
-			Transaction transaccion1Pepe2 = new Transaction(TransactionType.CREDIT, 300, "Bonus", LocalDateTime.now());
-			Transaction transaccion2Pepe2 = new Transaction(TransactionType.DEBIT, -200, "Rent", LocalDateTime.now());
-			Transaction transaccion3Pepe2 = new Transaction(TransactionType.DEBIT, -150, "Utilities", LocalDateTime.now());
+			Transaction transaccion1Pepe2 = new Transaction(TransactionType.CREDIT, 300, "Bonus");
+			Transaction transaccion2Pepe2 = new Transaction(TransactionType.DEBIT, -200, "Rent");
+			Transaction transaccion3Pepe2 = new Transaction(TransactionType.DEBIT, -150, "Utilities");
 			cuenta2Pepe.addTransaction(transaccion1Pepe2);
 			cuenta2Pepe.addTransaction(transaccion2Pepe2);
 			cuenta2Pepe.addTransaction(transaccion3Pepe2);
@@ -84,8 +87,8 @@ public class HomebankingApplication {
 			clientRepository.save(melba);
 
 			// Crear y guardar cuentas para Melba
-			Account cuenta1Melba = new Account("VIN003", today, 10000);
-			Account cuenta2Melba = new Account("VIN004", today, 2000);
+			Account cuenta1Melba = new Account(num.generateAccountNumber(), today, 10000);
+			Account cuenta2Melba = new Account(num.generateAccountNumber(), today, 2000);
 //			Account cuenta3Melba = new Account("VIN010", today, 2000);
 
 			melba.addAccount(cuenta1Melba);
@@ -97,9 +100,9 @@ public class HomebankingApplication {
 
 
 			// Crear y guardar transacciones para la cuenta 1 de Melba
-			Transaction transaccion1Melba1 = new Transaction(TransactionType.CREDIT, 5000, "Freelance Work", LocalDateTime.now());
-			Transaction transaccion2Melba1 = new Transaction(TransactionType.DEBIT, -2000, "New Laptop", LocalDateTime.now());
-			Transaction transaccion3Melba1 = new Transaction(TransactionType.DEBIT, -100, "Groceries", LocalDateTime.now());
+			Transaction transaccion1Melba1 = new Transaction(TransactionType.CREDIT, 5000, "Freelance Work");
+			Transaction transaccion2Melba1 = new Transaction(TransactionType.DEBIT, -2000, "New Laptop");
+			Transaction transaccion3Melba1 = new Transaction(TransactionType.DEBIT, -100, "Groceries");
 			cuenta1Melba.addTransaction(transaccion1Melba1);
 			cuenta1Melba.addTransaction(transaccion2Melba1);
 			cuenta1Melba.addTransaction(transaccion3Melba1);
@@ -108,9 +111,9 @@ public class HomebankingApplication {
 			transactionRepository.save(transaccion3Melba1);
 
 			// Crear y guardar transacciones para la cuenta 2 de Melba
-			Transaction transaccion1Melba2 = new Transaction(TransactionType.CREDIT, 3000, "Consulting", LocalDateTime.now());
-			Transaction transaccion2Melba2 = new Transaction(TransactionType.DEBIT, -1500, "Vacation", LocalDateTime.now());
-			Transaction transaccion3Melba2 = new Transaction(TransactionType.DEBIT, -500, "Groceries", LocalDateTime.now());
+			Transaction transaccion1Melba2 = new Transaction(TransactionType.CREDIT, 3000, "Consulting");
+			Transaction transaccion2Melba2 = new Transaction(TransactionType.DEBIT, -1500, "Vacation");
+			Transaction transaccion3Melba2 = new Transaction(TransactionType.DEBIT, -500, "Groceries");
 			cuenta2Melba.addTransaction(transaccion1Melba2);
 			cuenta2Melba.addTransaction(transaccion2Melba2);
 			cuenta2Melba.addTransaction(transaccion3Melba2);

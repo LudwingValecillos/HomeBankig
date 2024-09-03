@@ -45,7 +45,6 @@ public class WebConfig {
                 //No es seguro ya que las credenciales de usuario son sensibles y viajan sin protección
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-
                 //Se desactiva la configuración de los encabezados
                 //si deseas permitir que otras aplicaciones se incrusten en la tuya.
                 //Se desactiva ya que utilizamos el h2-console para interactuar con la base de datos ya que es embebida en la app
@@ -54,8 +53,8 @@ public class WebConfig {
                 .authorizeHttpRequests(authorize ->
                         authorize
                                 .requestMatchers("/api/current", "/api/accounts/clients/current/accounts", "/api/cards/clients/current/cards").hasRole("CLIENT")
-                                .requestMatchers("/api/clients/", "/api/clients/**", "/api/accounts/", "/api/accounts/**","h2-console/**", "/api/cards/", "/api/cards/**").hasRole("ADMIN")
-                                .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                                .requestMatchers("/api/clients/", "/api/clients/**", "/api/accounts/", "/api/accounts/**", "/api/cards/", "/api/cards/**").hasRole("ADMIN")
+                                .requestMatchers("/api/auth/login", "/api/auth/register","h2-console/**", "h2-console").permitAll()
                                 .anyRequest().authenticated()
                 )
 
@@ -68,16 +67,21 @@ public class WebConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         //Se retorna la configuración y se construye la configuracion de la cadena de seguridad
+
+        //Build(patrones diseños)
+
         return httpSecurity.build();
     }
 
 
     @Bean
     PasswordEncoder passwordEncoder() {
+
         // Crea un bean que utiliza el algoritmo BCrypt para cifrar contraseñas de forma segura.
         // BCrypt es un algoritmo de hash unidireccional que genera una representación encriptada de la contraseña,
         // haciendo imposible recuperar la contraseña original.
         // Este cifrado se utiliza principalmente al registrar nuevos usuarios para proteger sus credenciales.
+
         return new BCryptPasswordEncoder();
     }
 

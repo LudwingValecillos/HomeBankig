@@ -1,11 +1,11 @@
 package com.mainhub.homebanking.models;
 
-import com.mainhub.homebanking.models.utils.GenerateNumberCard;
+import com.mainhub.homebanking.models.utils.GenerateNumber;
 import jakarta.persistence.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.*;
 
+//Anotaciones
 @Entity //Le estamos idicando a spring que genere una tabla en la base de datos
 public class Client {
     @Id//Indica que va a ser la clave primaria en la base de datos
@@ -127,7 +127,7 @@ public class Client {
 
     public void addCard(Card card){
         this.cards.add(card);
-        card.setNumber(new GenerateNumberCard().generateNumber());
+        card.setNumber(new GenerateNumber().generateNumber());
         card.setClient(this);
         card.setCardHolder(this.firstName + " " + this.lastName);
         card.setCvv(new Random().nextInt((999 - 100) + 1) + 100);

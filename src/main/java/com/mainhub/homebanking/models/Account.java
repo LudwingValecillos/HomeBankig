@@ -1,6 +1,7 @@
 package com.mainhub.homebanking.models;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.mainhub.homebanking.models.type.TransactionType;
 import com.mainhub.homebanking.repositories.AccountRepository;
 import com.mainhub.homebanking.repositories.AccountRepository;
 
@@ -79,6 +80,12 @@ public class Account {
     public void addTransaction(Transaction transaction) {
         this.transactions.add(transaction);
         transaction.setAccount(this);
+
+        if (transaction.getType() == TransactionType.DEBIT) {
+            this.balance -= transaction.getAmount();
+        } else {
+            this.balance += transaction.getAmount();
+        }
     }
 
     public Set<Transaction> getTransactions() {
