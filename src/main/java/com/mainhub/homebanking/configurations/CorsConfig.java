@@ -17,12 +17,14 @@ public class CorsConfig {
      *
      * @return Una instancia de CorsConfigurationSource que define las reglas de CORS.
      */
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // Especifica los orígenes permitidos para las solicitudes CORS.
         // Aquí, se permiten solicitudes desde http://localhost:8080 y http://localhost:5173.
+        //
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080", "http://localhost:5173"));
 
         // Especifica los métodos HTTP permitidos para las solicitudes CORS.

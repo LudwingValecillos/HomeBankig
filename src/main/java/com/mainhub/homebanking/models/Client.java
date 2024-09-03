@@ -8,7 +8,8 @@ import java.util.*;
 
 @Entity //Le estamos idicando a spring que genere una tabla en la base de datos
 public class Client {
-    @Id//Indica que va a ser la clave primaria en la base de datos
+
+    @Id //Indica que va a ser la clave primaria en la base de datos
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Indica que va a ser una clave primaria autoincremental en la base de datos (1,2,3,4,5...)
     private long id;
     private String firstName;

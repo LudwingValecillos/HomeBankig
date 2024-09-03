@@ -38,12 +38,16 @@ public class WebConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 
         httpSecurity
+
                 // Configuración de CORS utilizando la fuente de configuración proporcionada.
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
-                // Desactiva la protección CSRF (Cross-Site Request Forgery) (CSRF es un ataque de fuerza bruta que se utiliza para falsificar la autenticación).
+
+                //
                 .csrf(AbstractHttpConfigurer::disable)
+
                 // Desactiva la autenticación básica HTTP.
                 .httpBasic(AbstractHttpConfigurer::disable)
+
                 // Desactiva el formulario de inicio de sesión.
                 .formLogin(AbstractHttpConfigurer::disable)
 
@@ -54,11 +58,13 @@ public class WebConfig {
                 // Configura las reglas de autorización para las solicitudes HTTP.
                 .authorizeHttpRequests(authorize ->
                         authorize
+
                                 .requestMatchers("/api/clients/", "/api/clients/**", "/api/accounts/", "/api/accounts/**").hasRole("ADMIN")
+
                                 // Permite el acceso sin autenticación a las rutas especificadas (login, registro, y consola H2).
                                 .requestMatchers("/api/auth/login", "/api/auth/register", "/h2-console/**").permitAll()
 
-                                .requestMatchers("/api/auth/current", "/api/clients/test").hasRole("CLIENT")
+                               .requestMatchers("/api/auth/current", "/api/clients/test", "/api/accounts/current/new", "/api/accounts/hello").hasRole("CLIENT")
 
                 )
 
@@ -94,8 +100,10 @@ public class WebConfig {
      * @return El AuthenticationManager configurado.
      * @throws Exception Si ocurre algún error durante la configuración.
      */
+
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
+
     }
 }

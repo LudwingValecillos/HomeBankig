@@ -19,6 +19,7 @@ import java.io.IOException;
 /** Para esta clase, utilizaremos la anotación @Component,
  * que la marcará como un componente Spring, permitiendo que sea escaneada
  * y añadida al contexto como un Bean para ser gestionada por Spring. **/
+
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 
@@ -27,7 +28,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtUtilService jwtUtilService; // Servicio para manejar la lógica de JWT (JSON Web Token).
-
 
 
     /**
@@ -53,7 +53,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             final String authorizationHeader = request.getHeader("Authorization");
 
             // Verificar si el encabezado es válido y contiene el prefijo "Bearer ".
-
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 // Extraer el token JWT del encabezado.
                 jwt = authorizationHeader.substring(7);
@@ -73,6 +72,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
                 // Verificar si el token JWT no ha expirado.
                 if (!jwtUtilService.isTokenExpired(jwt)) {
+
                     // Crear objeto de autenticación con los detalles del usuario y sus autoridades.
 
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
@@ -83,7 +83,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                      * new WebAuthenticationDetailsSource(): Esta es una clase de Spring Security
                      * que se encarga de crear detalles de autenticación específicos para la solicitud HTTP actual.
                      */
+
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
                     // Establecer la autenticación en el contexto de seguridad.
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
@@ -92,6 +94,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             // Manejar excepciones (para producción, usar un logger).
             System.out.println(e.getMessage());
+
         } finally {
             // Continuar con la cadena de filtros.
             filterChain.doFilter(request, response);

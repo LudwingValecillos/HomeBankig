@@ -6,8 +6,9 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ClientRepository extends JpaRepository<Client, Long> {
-    //    ch.qos.logback.core.net.server.Client findByEmail(String username);
+
     Client findByEmail(String email);
+
 
     // Long es el tipo de dato de la clave primaria, Alumno es el tipo de dato de la clase.
 

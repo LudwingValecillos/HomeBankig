@@ -81,34 +81,31 @@ public class AuthController {
         }
 
         // Verifica si el nombre y apellido no están vacíos.
-        if (registerDTO.firstName().isBlank() || registerDTO.lastName().isBlank()) {
+        if (registerDTO.firstName().isBlank() || registerDTO.lastName().isBlank() || registerDTO.firstName().length() < 3 || registerDTO.lastName().length() < 3) {
             return new ResponseEntity<>("First name and last name cannot be empty", HttpStatus.BAD_REQUEST);
         }
 
         // Verifica si la contraseña cumple con el requisito mínimo de longitud.
-        if (registerDTO.password().length() < 8) {
-            return new ResponseEntity<>("Password must be at least 8 characters long", HttpStatus.BAD_REQUEST);
+        if (registerDTO.password().length() < 8
+                || !registerDTO.password().matches(".*[A-Z].*")
+                || !registerDTO.password().matches(".*[a-z].*")
+                || !registerDTO.password().matches(".*\\d.*")
+                || !registerDTO.password().matches(".*[^a-zA-Z0-9].*")) {
+            return new ResponseEntity<>("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character.", HttpStatus.BAD_REQUEST);
         }
 
-        // Codifica la contraseña antes de almacenarla.
-//        String encodedPassword = passwordEncoder.encode(registerDTO.password());
-
-        // Crea un nuevo cliente con la información proporcionada.
         Client newClient = new Client(registerDTO.firstName(), registerDTO.lastName(), registerDTO.email(), passwordEncoder.encode(registerDTO.password()));
 
-        // Guarda el cliente y convierte a DTO.
+
         ClientDTO clientDTO = new ClientDTO(clientRepository.save(newClient));
 
-        // Crea una nueva cuenta para el cliente.
         Account account = new Account("VIN-" + String.valueOf(this.num), LocalDate.now(), 0);
         this.num += 1;
 
-        // Asocia la cuenta al cliente.
         newClient.addAccount(account);
-        // Guarda la cuenta y convierte a DTO.
+
         AccountDTO accountDTO = new AccountDTO(accountRepository.save(account));
 
-        // Guarda el nuevo cliente en la base de datos.
         clientRepository.save(newClient);
 
         // Retorna una respuesta exitosa con un mensaje de confirmación.
@@ -122,6 +119,8 @@ public class AuthController {
         Client client = clientRepository.findByEmail(authentication.getName());
 
         // Retorna los detalles del cliente en la respuesta.
+
         return ResponseEntity.ok(new ClientDTO(client));
+
     }
 }
