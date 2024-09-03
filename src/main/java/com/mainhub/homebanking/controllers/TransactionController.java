@@ -1,7 +1,7 @@
 package com.mainhub.homebanking.controllers;
 
 
-import com.mainhub.homebanking.DTO.TransactionDTO;
+import com.mainhub.homebanking.DTO.NewTransactionDTO;
 import com.mainhub.homebanking.models.Account;
 import com.mainhub.homebanking.models.Client;
 import com.mainhub.homebanking.models.Transaction;
@@ -34,10 +34,10 @@ public class TransactionController {
 
 
     @PostMapping("/clients/current/transactions")
-    public ResponseEntity<?> createTransaction(Authentication authentication, @RequestBody TransactionDTO transactionDTO) {
+    public ResponseEntity<?> createTransaction(Authentication authentication, @RequestBody NewTransactionDTO newTransactionDTO) {
 
-        if(transactionDTO.type() == null || transactionDTO.amount() == 0 || transactionDTO.description().isBlank()
-                || transactionDTO.SourceAccount().isBlank() || transactionDTO.DestinationAccount().isBlank()) {
+        if(newTransactionDTO.type().isBlank() || newTransactionDTO.amount() == 0 || newTransactionDTO.description().isBlank()
+                || newTransactionDTO.sourceAccount().isBlank() || newTransactionDTO.DestinationAccount().isBlank()) {
 
             return new ResponseEntity<>("All fields are required", HttpStatus.BAD_REQUEST);
         }
@@ -50,23 +50,28 @@ public class TransactionController {
         }
 
         // Verifica si el cliente es propietario de la cuenta de origen
-        if(client.getAccounts().contains(transactionDTO.SourceAccount())) {
+        if(client.getAccounts().contains(newTransactionDTO.sourceAccount())) {
             return new ResponseEntity<>("Source account not found", HttpStatus.NOT_FOUND);
         }
 
         // Verifica la cuenta de destino
-        if(!accountRepository.existsByNumber(transactionDTO.DestinationAccount())) {
+        if(!accountRepository.existsByNumber(newTransactionDTO.DestinationAccount())) {
             return new ResponseEntity<>("Destination account not found", HttpStatus.NOT_FOUND);
         }
 
 
-        Account sourceAccount = accountRepository.findByNumber(transactionDTO.SourceAccount());
-        Account destinationAccount = accountRepository.findByNumber(transactionDTO.DestinationAccount());
+        Account sourceAccount = accountRepository.findByNumber(newTransactionDTO.sourceAccount());
+        Account destinationAccount = accountRepository.findByNumber(newTransactionDTO.DestinationAccount());
 
-        Transaction transactionSource = new Transaction( TransactionType.DEBIT, transactionDTO.amount(), transactionDTO.description());
+
+        if(sourceAccount.getBalance() < newTransactionDTO.amount()){
+            return new ResponseEntity<>("Balance insuficiente",HttpStatus.BAD_REQUEST);
+        }
+
+        Transaction transactionSource = new Transaction( TransactionType.DEBIT, newTransactionDTO.amount(), newTransactionDTO.description());
         sourceAccount.addTransaction(transactionSource);
 
-        Transaction transactionDestination = new Transaction(TransactionType.CREDIT, transactionDTO.amount(), transactionDTO.description());
+        Transaction transactionDestination = new Transaction(TransactionType.CREDIT, newTransactionDTO.amount(), newTransactionDTO.description());
         destinationAccount.addTransaction(transactionDestination);
 
 
