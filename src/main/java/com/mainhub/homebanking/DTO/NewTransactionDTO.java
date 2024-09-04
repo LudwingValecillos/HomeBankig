@@ -1,6 +1,6 @@
 package com.mainhub.homebanking.DTO;
 
-public record NewTransactionDTO(String type, double amount, String description, String sourceAccount, String DestinationAccount) {
+public record NewTransactionDTO(double amount, String description, String sourceAccount, String destinationAccount) {
 
 
 
