@@ -8,6 +8,8 @@ import com.mainhub.homebanking.repositories.AccountRepository;
 import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -82,7 +84,7 @@ public class Account {
         transaction.setAccount(this);
 
         if (transaction.getType() == TransactionType.DEBIT) {
-            this.balance -= transaction.getAmount();
+            this.balance += transaction.getAmount();
         } else {
             this.balance += transaction.getAmount();
         }

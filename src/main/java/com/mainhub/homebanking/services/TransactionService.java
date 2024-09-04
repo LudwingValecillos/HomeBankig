@@ -27,44 +27,69 @@ public class TransactionService {
     private TransactionRepository transactionRepository;
 
     @Transactional
-    public ResponseEntity<String> processTransaction(String email, NewTransactionDTO transaction) {
+    public ResponseEntity<String> processTransaction(String email, NewTransactionDTO transactionDTO) {
 
-        if (transaction.amount() == 0 || transaction.description().isBlank()
-                || transaction.sourceAccount().isBlank() || transaction.destinationAccount().isBlank()) {
-            return new ResponseEntity<>("All fields are required", HttpStatus.BAD_REQUEST);
+        // Validate transaction data
+        ResponseEntity<String> validationResponse = validateTransaction(transactionDTO);
+        if (validationResponse != null) {
+            return validationResponse;
         }
 
+        // Check client and accounts
+        ResponseEntity<String> clientAccountResponse = checkClientAndAccounts(email, transactionDTO);
+        if (clientAccountResponse != null) {
+            return clientAccountResponse;
+        }
+
+        // Perform transaction
+        return performTransaction(transactionDTO);
+    }
+
+    private ResponseEntity<String> validateTransaction(NewTransactionDTO transactionDTO) {
+        if (transactionDTO.amount() == 0 || transactionDTO.description().isBlank()
+                || transactionDTO.sourceAccount().isBlank() || transactionDTO.destinationAccount().isBlank()) {
+            return new ResponseEntity<>("All fields are required", HttpStatus.BAD_REQUEST);
+        }
+        if (transactionDTO.sourceAccount().equals(transactionDTO.destinationAccount())) {
+            return new ResponseEntity<>("Source and destination accounts cannot be the same", HttpStatus.BAD_REQUEST);
+        }
+        return null;
+    }
+
+    private ResponseEntity<String> checkClientAndAccounts(String email, NewTransactionDTO transactionDTO) {
         Client client = clientRepository.findByEmail(email);
 
         if (client == null) {
             return new ResponseEntity<>("Client not found", HttpStatus.BAD_REQUEST);
         }
 
-        // Verifica si el cliente es propietario de la cuenta de origen
-        if (client.getAccounts().stream().noneMatch(account -> account.getNumber().equals(transaction.sourceAccount()))) {
+        //Chequea si ek cliente es propetario de la cuenta
+        //noneMatch devuelve true si ningún elemento del
+        // stream coincide
+
+        if (client.getAccounts().stream().noneMatch(account -> account.getNumber().equals(transactionDTO.sourceAccount()))) {
             return new ResponseEntity<>("Source account not found", HttpStatus.BAD_REQUEST);
         }
 
-        // Verifica la cuenta de destino
-        if (!accountRepository.existsByNumber(transaction.destinationAccount())) {
+        if (!accountRepository.existsByNumber(transactionDTO.destinationAccount())) {
             return new ResponseEntity<>("Destination account not found", HttpStatus.BAD_REQUEST);
         }
 
-        if (transaction.sourceAccount().equals(transaction.destinationAccount())) {
-            return new ResponseEntity<>("Source and destination accounts cannot be the same", HttpStatus.BAD_REQUEST);
-        }
+        return null;
+    }
 
-        Account sourceAccount = accountRepository.findByNumber(transaction.sourceAccount());
-        Account destinationAccount = accountRepository.findByNumber(transaction.destinationAccount());
+    private ResponseEntity<String> performTransaction(NewTransactionDTO transactionDTO) {
+        Account sourceAccount = accountRepository.findByNumber(transactionDTO.sourceAccount());
+        Account destinationAccount = accountRepository.findByNumber(transactionDTO.destinationAccount());
 
-        if (sourceAccount.getBalance() < transaction.amount()) {
+        if (sourceAccount.getBalance() < transactionDTO.amount()) {
             return new ResponseEntity<>("Not enough balance", HttpStatus.BAD_REQUEST);
         }
 
-        Transaction transactionSource = new Transaction(TransactionType.DEBIT, transaction.amount(), transaction.description());
+        Transaction transactionSource = new Transaction(TransactionType.DEBIT, -transactionDTO.amount(), transactionDTO.description());
         sourceAccount.addTransaction(transactionSource);
 
-        Transaction transactionDestination = new Transaction(TransactionType.CREDIT, transaction.amount(), transaction.description());
+        Transaction transactionDestination = new Transaction(TransactionType.CREDIT, transactionDTO.amount(), transactionDTO.description());
         destinationAccount.addTransaction(transactionDestination);
 
         transactionRepository.save(transactionSource);
