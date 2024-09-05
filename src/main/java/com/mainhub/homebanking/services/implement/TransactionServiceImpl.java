@@ -1,4 +1,4 @@
-package com.mainhub.homebanking.services;
+package com.mainhub.homebanking.services.implement;
 
 import com.mainhub.homebanking.DTO.NewTransactionDTO;
 import com.mainhub.homebanking.models.Account;
@@ -8,6 +8,7 @@ import com.mainhub.homebanking.models.type.TransactionType;
 import com.mainhub.homebanking.repositories.AccountRepository;
 import com.mainhub.homebanking.repositories.ClientRepository;
 import com.mainhub.homebanking.repositories.TransactionRepository;
+import com.mainhub.homebanking.services.TransactionsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class TransactionService {
+public class TransactionServiceImpl implements TransactionsService {
 
     @Autowired
     private ClientRepository clientRepository;
@@ -25,6 +26,8 @@ public class TransactionService {
 
     @Autowired
     private TransactionRepository transactionRepository;
+
+
 
     @Transactional
     public ResponseEntity<String> processTransaction(String email, NewTransactionDTO transactionDTO) {
@@ -45,7 +48,7 @@ public class TransactionService {
         return performTransaction(transactionDTO);
     }
 
-    private ResponseEntity<String> validateTransaction(NewTransactionDTO transactionDTO) {
+    public ResponseEntity<String> validateTransaction(NewTransactionDTO transactionDTO) {
         if (transactionDTO.amount() == 0 || transactionDTO.description().isBlank()
                 || transactionDTO.sourceAccount().isBlank() || transactionDTO.destinationAccount().isBlank()) {
             return new ResponseEntity<>("All fields are required", HttpStatus.BAD_REQUEST);
@@ -56,16 +59,12 @@ public class TransactionService {
         return null;
     }
 
-    private ResponseEntity<String> checkClientAndAccounts(String email, NewTransactionDTO transactionDTO) {
+    public ResponseEntity<String> checkClientAndAccounts(String email, NewTransactionDTO transactionDTO) {
         Client client = clientRepository.findByEmail(email);
 
         if (client == null) {
             return new ResponseEntity<>("Client not found", HttpStatus.BAD_REQUEST);
         }
-
-        //Chequea si ek cliente es propetario de la cuenta
-        //noneMatch devuelve true si ningún elemento del
-        // stream coincide
 
         if (client.getAccounts().stream().noneMatch(account -> account.getNumber().equals(transactionDTO.sourceAccount()))) {
             return new ResponseEntity<>("Source account not found", HttpStatus.BAD_REQUEST);
@@ -78,7 +77,7 @@ public class TransactionService {
         return null;
     }
 
-    private ResponseEntity<String> performTransaction(NewTransactionDTO transactionDTO) {
+    public ResponseEntity<String> performTransaction(NewTransactionDTO transactionDTO) {
         Account sourceAccount = accountRepository.findByNumber(transactionDTO.sourceAccount());
         Account destinationAccount = accountRepository.findByNumber(transactionDTO.destinationAccount());
 

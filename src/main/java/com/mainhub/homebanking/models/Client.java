@@ -1,6 +1,6 @@
 package com.mainhub.homebanking.models;
 
-import com.mainhub.homebanking.models.utils.GenerateNumber;
+import com.mainhub.homebanking.utils.GenerateNumber;
 import jakarta.persistence.*;
 
 import java.util.*;

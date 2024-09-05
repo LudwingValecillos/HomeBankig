@@ -3,7 +3,7 @@ package com.mainhub.homebanking.controllers;
 import com.mainhub.homebanking.DTO.AccountDTO;
 import com.mainhub.homebanking.models.Account;
 import com.mainhub.homebanking.models.Client;
-import com.mainhub.homebanking.models.utils.GenerateNumber;
+import com.mainhub.homebanking.utils.GenerateNumber;
 import com.mainhub.homebanking.repositories.AccountRepository;
 import com.mainhub.homebanking.repositories.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;

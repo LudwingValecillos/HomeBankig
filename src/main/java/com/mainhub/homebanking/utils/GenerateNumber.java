@@ -1,4 +1,4 @@
-package com.mainhub.homebanking.models.utils;
+package com.mainhub.homebanking.utils;
 
 import com.mainhub.homebanking.repositories.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;

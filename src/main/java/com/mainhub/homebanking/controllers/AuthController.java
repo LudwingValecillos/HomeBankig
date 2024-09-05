@@ -6,7 +6,7 @@ import com.mainhub.homebanking.DTO.LoginDTO;
 import com.mainhub.homebanking.DTO.RegisterDTO;
 import com.mainhub.homebanking.models.Account;
 import com.mainhub.homebanking.models.Client;
-import com.mainhub.homebanking.models.utils.GenerateNumber;
+import com.mainhub.homebanking.utils.GenerateNumber;
 import com.mainhub.homebanking.repositories.AccountRepository;
 import com.mainhub.homebanking.repositories.ClientRepository;
 import com.mainhub.homebanking.servicesSecurity.JwtUtilService;

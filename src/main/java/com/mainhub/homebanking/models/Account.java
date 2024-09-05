@@ -32,6 +32,8 @@ public class Account {
     @OneToMany(mappedBy="account", fetch=FetchType.EAGER)
     private Set<Transaction> transactions = new HashSet<>();
 
+
+
     public Account() {
     }
 
@@ -88,6 +90,7 @@ public class Account {
         } else {
             this.balance += transaction.getAmount();
         }
+
     }
 
     public Set<Transaction> getTransactions() {

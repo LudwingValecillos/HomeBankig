@@ -6,6 +6,7 @@ import com.mainhub.homebanking.models.Account;
 import com.mainhub.homebanking.models.Client;
 import com.mainhub.homebanking.repositories.AccountRepository;
 import com.mainhub.homebanking.repositories.ClientRepository;
+import com.mainhub.homebanking.services.ClientServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,134 +20,107 @@ import static java.util.stream.Collectors.toList;
 
 @RestController
 @RequestMapping("/api/clients")
-//Se le dice api para seguir la convención de rutas para el controlador
-
-// Indica que la clase es un controlador de recursos y maneja las solicitudes HTTP (GET, POST, PUT, DELETE, etc.).
-
-// La ruta base para las solicitudes es "/api/clients".
-
-//@CrossOrigin(origins = "http://localhost:5173") // Configuración CORS para este controlador
-
 public class ClientController {
-    @Autowired
-    //conecta/cablea a la interfaz de clientrepository que esta extiende de jpa repository para utilizar sus metodos, lo que se denomida inyeccion de dependencias.
-    private ClientRepository clientRepository;
 
     @Autowired
-    private AccountRepository accountRepository;
-    // Inyección de dependencias para el repositorio de clientes.
+    private ClientServices clientService;
 
-    ////////------------------------------- Servlet --------------------------------------//////////
-
-    //Mapping es lo que se representa en el
     @GetMapping("/")
-    // Maneja las solicitudes GET a la ruta base "/" para obtener todos los clientes.
-    public List<ClientDTO> getAllClients() {
-        return clientRepository.findAll().stream().filter(client -> client.isActive()).map(client -> new ClientDTO(client)).collect(toList());
-
-    }
-    @GetMapping("/id={id}")
-    // Maneja las solicitudes GET para obtener un cliente por ID.
-    public ResponseEntity<ClientDTO> getById(@PathVariable Long id) {
-
-        return clientRepository.findById(id).map(ClientDTO::new) // Convertir Client a ClientDTO
-                .map(ResponseEntity::ok) // Si está presente, devolver 200 OK con el ClientDTO
-                .orElse(ResponseEntity.notFound().build());
-
+    public ResponseEntity<?> getAllClients() {
+        return new ResponseEntity<>(clientService.getAllClientDto(), HttpStatus.OK);
     }
 
-    @GetMapping("/disabled")
-    // Maneja las solicitudes GET para obtener todos los clientes desactivados.
-    public List<ClientDTO> getAllClientsDisabled() {
-        return clientRepository.findAll().stream().filter(client -> client.isActive() == false).map(client -> new ClientDTO(client)).collect(toList());
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getClientById(@PathVariable Long id) {
+        if (clientService.getClientById(id) == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(clientService.getClientDto(clientService.getClientById(id)), HttpStatus.OK);
+        }
     }
-    @DeleteMapping("/id={id}")
-    // Maneja las solicitudes DELETE para eliminar un cliente por ID.
-    public ResponseEntity<String> deleteClient(@PathVariable Long id) {
-        Client client = clientRepository.findById(id).orElse(null);
-        client.setActive(false);
-        clientRepository.save(client);
-        return ResponseEntity.ok("Client desactived");
-    }
+}
 
-//    @PostMapping("/create")
-//    // Maneja las solicitudes POST para crear un nuevo cliente.
-//    public ResponseEntity<ClientDTO> agregarClient(@RequestParam String email, @RequestParam String firstName, @RequestParam String lastName) {
-//        Client client = new Client(firstName, lastName, email);
+
+//    @GetMapping("/")
+//    public List<ClientDTO> getAllClients() {
+//        return clientRepository.findAll().stream().filter(client -> client.isActive()).map(client -> new ClientDTO(client)).collect(toList());
+//    }
+//    @GetMapping("/{id}")
+//    // Maneja las solicitudes GET para obtener un cliente por ID.
+//    public ResponseEntity<ClientDTO> getById(@PathVariable Long id) {
+//
+//        return clientRepository.findById(id).map(ClientDTO::new) // Convertir Client a ClientDTO
+//                .map(ResponseEntity::ok) // Si está presente, devolver 200 OK con el ClientDTO
+//                .orElse(ResponseEntity.notFound().build());
+//
+//    }
+//
+//    @GetMapping("/disabled")
+//    // Maneja las solicitudes GET para obtener todos los clientes desactivados.
+//    public List<ClientDTO> getAllClientsDisabled() {
+//        return clientRepository.findAll().stream().filter(client -> client.isActive() == false).map(client -> new ClientDTO(client)).collect(toList());
+//    }
+//    @DeleteMapping("/{id}")
+//    // Maneja las solicitudes DELETE para eliminar un cliente por ID.
+//    public ResponseEntity<String> deleteClient(@PathVariable Long id) {
+//        Client client = clientRepository.findById(id).orElse(null);
+//        client.setActive(false);
+//        clientRepository.save(client);
+//        return ResponseEntity.ok("Client desactived");
+//    }
+//
+//    @PutMapping("/update/{id}")
+//    // Maneja las solicitudes PUT para actualizar un cliente existente.
+//    public ResponseEntity<?> updateClient(@PathVariable Long id, @RequestParam String firstName, @RequestParam String lastName, @RequestParam String email) {
+//        Client client = clientRepository.findById(id).orElse(null);
+//
+//        if (client == null) {
+//            return new ResponseEntity<>("El hijo de remil puta no existe " + id, HttpStatus.NOT_FOUND);
+//        }
+//
+//        client.setFirstName(firstName);
+//        client.setLastName(lastName);
+//        client.setEmail(email);
+//
+//        ClientDTO clientDTO = new ClientDTO(clientRepository.save(client));
+//
+//
+//        return new ResponseEntity<>(clientDTO, HttpStatus.OK);
+//    }
+//
+//    //ResponseEntity es una clase que representa una respuesta HTTP. Se utiliza para devolver una respuesta HTTP con un código de estado y un objeto de respuesta.
+//    @PatchMapping("/update/{id}")
+//    public ResponseEntity<?> partialUpdateClient(@PathVariable Long id,
+//                                                 @RequestParam(required = false) String firstName,
+//                                                 @RequestParam(required = false) String lastName,
+//                                                 @RequestParam(required = false) String email) {
+//
+//        Client client = clientRepository.findById(id).orElse(null);
+//
+//        if (client == null) {
+//            return new ResponseEntity<>("El hijo de remil puta no existe " + id, HttpStatus.NOT_FOUND);
+//        }
+//
+//        if (firstName != null) {
+//            client.setFirstName(firstName);
+//        }
+//        if (lastName != null) {
+//            client.setLastName(lastName);
+//        }
+//        if (email != null) {
+//            client.setEmail(email);
+//        }
 //
 //
 //        ClientDTO clientDTO = new ClientDTO(clientRepository.save(client));
 //
-////        String numero = "VIN00"+ String.valueOf(this.num);
-//
-//        Account account = new Account( "VIN00"+ String.valueOf(this.num), LocalDate.now(), 0);
-//        this.num = this.num + 1;
-//
-//        client.addAccount(account);
-//        AccountDTO accountDTO = new AccountDTO(accountRepository.save(account));
-//
-//
-//        return ResponseEntity.ok(clientDTO);
+//        return new ResponseEntity<>(clientDTO, HttpStatus.OK);
 //    }
-
-    @PutMapping("/update/{id}")
-    // Maneja las solicitudes PUT para actualizar un cliente existente.
-    public ResponseEntity<?> updateClient(@PathVariable Long id, @RequestParam String firstName, @RequestParam String lastName, @RequestParam String email) {
-        Client client = clientRepository.findById(id).orElse(null);
-
-        if (client == null) {
-            return new ResponseEntity<>("El hijo de remil puta no existe " + id, HttpStatus.NOT_FOUND);
-        }
-
-        client.setFirstName(firstName);
-        client.setLastName(lastName);
-        client.setEmail(email);
-
-        ClientDTO clientDTO = new ClientDTO(clientRepository.save(client));
+//
+//    @GetMapping("/test")
+//    public ResponseEntity<?> test (Authentication authentication){
+//        String email = authentication.getName();
+//        return ResponseEntity.ok("Hello"+ email);
 
 
-        return new ResponseEntity<>(clientDTO, HttpStatus.OK);
-    }
 
-    //ResponseEntity es una clase que representa una respuesta HTTP. Se utiliza para devolver una respuesta HTTP con un código de estado y un objeto de respuesta.
-    @PatchMapping("/update/{id}")
-    public ResponseEntity<?> partialUpdateClient(@PathVariable Long id,
-                                                 @RequestParam(required = false) String firstName,
-                                                 @RequestParam(required = false) String lastName,
-                                                 @RequestParam(required = false) String email) {
-
-        Client client = clientRepository.findById(id).orElse(null);
-
-        if (client == null) {
-            return new ResponseEntity<>("El hijo de remil puta no existe " + id, HttpStatus.NOT_FOUND);
-        }
-
-        if (firstName != null) {
-            client.setFirstName(firstName);
-        }
-        if (lastName != null) {
-            client.setLastName(lastName);
-        }
-        if (email != null) {
-            client.setEmail(email);
-        }
-
-
-        ClientDTO clientDTO = new ClientDTO(clientRepository.save(client));
-
-        return new ResponseEntity<>(clientDTO, HttpStatus.OK);
-    }
-
-
-    @GetMapping("/hello")
-    //
-    public String getClients() {
-        return "Hello Clientes, me gusta el pan";
-    }
-
-    @GetMapping("/test")
-    public ResponseEntity<?> test (Authentication authentication){
-        String email = authentication.getName();
-        return ResponseEntity.ok("Hello"+ email);
-    }
-}

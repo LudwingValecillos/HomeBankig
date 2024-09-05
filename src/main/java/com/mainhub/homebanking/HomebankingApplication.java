@@ -6,7 +6,7 @@ import com.mainhub.homebanking.models.*;
 import com.mainhub.homebanking.models.type.CardColor;
 import com.mainhub.homebanking.models.type.CardType;
 import com.mainhub.homebanking.models.type.TransactionType;
-import com.mainhub.homebanking.models.utils.GenerateNumber;
+import com.mainhub.homebanking.utils.GenerateNumber;
 import com.mainhub.homebanking.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
