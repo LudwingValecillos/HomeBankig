@@ -27,7 +27,7 @@ public class GenerateNumber {
 
     public String generateRandomNumber() {
         Random random = new Random();
-        // Genera un número aleatorio entre 1000 y 9999
+        // Genera un número aleatorio entre 100 y 999
         return Integer.toString(random.nextInt((999 - 100) + 1) + 100);
     }
 
@@ -35,7 +35,6 @@ public class GenerateNumber {
     public String generateAccountNumber() {
         String number = generateRandomNumber();
 
-        // Verifica si el número ya existe, si es así, genera uno nuevo
         while (accountRepository.existsByNumber(prefijo() + number)) {
             number = generateRandomNumber();
         }

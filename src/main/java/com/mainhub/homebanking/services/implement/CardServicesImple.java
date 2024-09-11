@@ -23,86 +23,127 @@ import java.util.stream.Collectors;
 public class CardServicesImple implements CardServices {
 
     @Autowired
-    CardRepository cardRepository;
+    private CardRepository cardRepository;
 
     @Autowired
-    ClientRepository clientRepository;
-
-
+    private ClientRepository clientRepository;
 
     @Override
     public List<Card> getAllCards() {
         return cardRepository.findAll();
     }
 
-
     @Override
     public List<CardDTO> getAllCardsDTO() {
-        return getAllCards().stream().map(card -> new CardDTO(card)).collect(Collectors.toList());
+        return getAllCards().stream()
+                .map(CardDTO::new)
+                .collect(Collectors.toList());
     }
 
     @Override
     public ResponseEntity<?> createCard(Authentication authentication, NewCardDTO newCardDTO) {
 
-        if(validateNewCarDto(newCardDTO) != null) {
-            return validateNewCarDto(newCardDTO);
+        if (validateNewCardDto(newCardDTO) != null) {
+            return new ResponseEntity<>(validateNewCardDto(newCardDTO), HttpStatus.BAD_REQUEST);
         }
 
-        Client client = clientRepository.findByEmail(authentication.getName());
-
-        CardColor color;
-        try {
-            color = CardColor.valueOf(newCardDTO.color().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>("Invalid color", HttpStatus.BAD_REQUEST);
-        }
-        if(validateDetailsCard(client, newCardDTO, color) != null) {
-            return validateDetailsCard(client, newCardDTO, color);
+        if (validateDetailsCard(getClient(authentication), newCardDTO) != null) {
+            return new ResponseEntity<>(validateDetailsCard(getClient(authentication), newCardDTO), HttpStatus.FORBIDDEN);
         }
 
-        return generateCard(client, color, newCardDTO);
+        if (validateColor(getClient(authentication), getCardColor(newCardDTO.color()),getCardType(newCardDTO.type())) != null) {
+            return new ResponseEntity<>(validateColor(getClient(authentication), getCardColor(newCardDTO.color()),getCardType(newCardDTO.type())), HttpStatus.FORBIDDEN);
+        }
+
+        return ResponseEntity.ok().body(saveCard(getClient(authentication), generateCard(newCardDTO)));
     }
 
-    private ResponseEntity<?> validateNewCarDto(NewCardDTO card) {
-        if(card.type().isBlank() || card.color().isBlank() ) {
-            return new ResponseEntity<>("All fields are required", HttpStatus.BAD_REQUEST);
-        }
-        return null;
-    }
+    @Override
+    public String validateNewCardDto(NewCardDTO card) {
 
-    private ResponseEntity<?> validateDetailsCard(Client client, NewCardDTO newCardDTO, CardColor color) {
-        List<Card> cardsDebit = client.getCards().stream().filter(card -> card.getType() == CardType.DEBIT).toList();
-
-        List<Card> cardsCredit = client.getCards().stream().filter(card -> card.getType() == CardType.CREDIT).toList();
-
-
-        if(newCardDTO.type().equalsIgnoreCase("DEBIT")){
-            if(cardsDebit.size() >= 3 ) {
-                return new ResponseEntity<>("You can't have more than 3 debit cards", HttpStatus.FORBIDDEN);
-            }
-        }else{
-            if(cardsCredit.size() >= 3){
-                return new ResponseEntity<>("You can't have more than 3 credit cards", HttpStatus.FORBIDDEN);
-            }
+        if (card.type().isBlank()) {
+            return "The 'type' field is required.";
         }
 
-        if (cardsDebit.stream().anyMatch(card -> card.getColor() == color) ||
-                cardsCredit.stream().anyMatch(card -> card.getColor() == color)) {
-            return new ResponseEntity<>("You already have a card with this color", HttpStatus.BAD_REQUEST);
+        if (card.color().isBlank()) {
+            return "The 'color' field is required.";
         }
 
         return null;
     }
 
-    private ResponseEntity<?> generateCard(Client client, CardColor color, NewCardDTO newCardDTO) {
+    @Override
+    public Client getClient(Authentication authentication) {
+        return clientRepository.findByEmail(authentication.getName());
+    }
 
-        CardType type = newCardDTO.type().equalsIgnoreCase("DEBIT") ? CardType.DEBIT : CardType.CREDIT;
+    @Override
+    public String validateDetailsCard(Client client, NewCardDTO newCardDTO) {
 
-        Card card = new Card(LocalDateTime.now(), LocalDateTime.now().plusYears(5), type, color);
+        if (newCardDTO.type().equalsIgnoreCase("DEBIT")) {
+            if (getAllCardsDebits(client).size() >= 3) {
+                return "You can't have more than 3 debit cards";
+            }
+        } else {
+            if (getAllCardsCredits(client).size() >= 3) {
+                return "You can't have more than 3 credit cards";
+            }
+        }
+        return null;
+    }
 
+    @Override
+    public String validateColor(Client client, CardColor color, CardType type) {
+
+        if (type == CardType.DEBIT) {
+            if (getAllCardsDebits(client).stream().anyMatch(card -> card.getColor() == color)) {
+                return "You already have a debit card with this color";
+            }
+        } else {
+            if (getAllCardsCredits(client).stream().anyMatch(card -> card.getColor() == color)) {
+                return "You already have a credit card with this color";
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public List<Card> getAllCardsCredits(Client client) {
+        return client.getCards().stream()
+                .filter(card -> card.getType() == CardType.CREDIT)
+                .toList();
+    }
+
+    @Override
+    public List<Card> getAllCardsDebits(Client client) {
+        return client.getCards().stream()
+                .filter(card -> card.getType() == CardType.DEBIT)
+                .toList();
+    }
+    @Override
+    public Card generateCard(NewCardDTO newCardDTO) {
+        return new Card(getExpirationDate(5), getCardType(newCardDTO.type()), getCardColor(newCardDTO.color()));
+    }
+
+    public String saveCard(Client client, Card card) {
         client.addCard(card);
-
         cardRepository.save(card);
-        return new ResponseEntity<>("Card created", HttpStatus.CREATED);
+        return "Card created";
+    }
+
+    @Override
+    public LocalDateTime getExpirationDate(int year) {
+        return LocalDateTime.now().plusYears(year);
+    }
+
+    @Override
+    public CardColor getCardColor(String color) {
+        return CardColor.valueOf(color.toUpperCase());
+    }
+
+    @Override
+    public CardType getCardType(String type) {
+        return type.equalsIgnoreCase("DEBIT") ? CardType.DEBIT : CardType.CREDIT;
     }
 }

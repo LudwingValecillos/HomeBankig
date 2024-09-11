@@ -34,9 +34,8 @@ public class Card {
 
 
 
-    public Card(LocalDateTime fromDate, LocalDateTime thruDate, CardType type, CardColor color) {
+    public Card(LocalDateTime thruDate, CardType type, CardColor color) {
 
-        this.fromDate = fromDate;
         this.thruDate = thruDate;
         this.type = type;
         this.color = color;

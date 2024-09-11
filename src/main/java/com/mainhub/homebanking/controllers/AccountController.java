@@ -46,6 +46,11 @@ public class AccountController {
         return accountServices.createAccount(authentication);
     }
 
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteAccount(Authentication authentication,@RequestBody Long id ) {
+        return accountServices.deleteAccount(id, authentication);
+    }
+
     @GetMapping("/hello")
     public String getClients() {
         return "Hello Accounts, me gusta el pan!";

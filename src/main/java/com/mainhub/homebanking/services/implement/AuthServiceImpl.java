@@ -1,7 +1,7 @@
-package com.mainhub.homebanking.services.impl;
+package com.mainhub.homebanking.services.implement;
 
-import com.mainhub.homebanking.DTO.AccountDTO;
 import com.mainhub.homebanking.DTO.ClientDTO;
+import com.mainhub.homebanking.DTO.LoanDTO;
 import com.mainhub.homebanking.DTO.LoginDTO;
 import com.mainhub.homebanking.DTO.RegisterDTO;
 import com.mainhub.homebanking.models.Account;
@@ -51,13 +51,13 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ResponseEntity<?> login(LoginDTO loginDTO) {
         try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginDTO.email(), loginDTO.password()));
 
-            final UserDetails userDetails = userDetailsService.loadUserByUsername(loginDTO.email());
-            final String jwt = jwtUtilService.generateToken(userDetails);
+            if (validateLogin(loginDTO) != null) {
+                return new ResponseEntity<>(validateLogin(loginDTO), HttpStatus.BAD_REQUEST);
+            }
 
-            return ResponseEntity.ok(jwt);
+            authenticate(loginDTO);
+            return ResponseEntity.ok(generateToken(getUserDetailsService(loginDTO)));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -65,30 +65,98 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
+    public String validateLogin(LoginDTO loginDTO) {
+
+        if (loginDTO.email().isEmpty() || loginDTO.password().isEmpty()) {
+            return "Email or password invalid";
+        }
+        return null;
+    }
+
+    public void authenticate(LoginDTO loginDTO) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginDTO.email(), loginDTO.password()));
+    }
+
+    public String generateToken(UserDetails userDetails) {
+
+        return jwtUtilService.generateToken(userDetails);
+    }
+
+    public UserDetails getUserDetailsService(LoginDTO loginDTO) {
+
+        return userDetailsService.loadUserByUsername(loginDTO.email());
+    }
+
+
     @Override
     public ResponseEntity<?> register(RegisterDTO registerDTO) {
+
+        ResponseEntity<?> validationResponse = validateRegister(registerDTO);
+        if (validationResponse != null) {
+            return validationResponse;
+        }
+
+        saveClientAndAccount(generateClient(registerDTO), generateAccount(registerDTO));
+
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    public ResponseEntity<?> validateRegister(RegisterDTO registerDTO) {
+        // Verifico si el correo ya existe
         if (clientRepository.findByEmail(registerDTO.email()) != null) {
             return new ResponseEntity<>("Email already exists", HttpStatus.BAD_REQUEST);
         }
 
-        if (registerDTO.firstName().isBlank() || registerDTO.lastName().isBlank()) {
-            return new ResponseEntity<>("First name and last name cannot be empty", HttpStatus.BAD_REQUEST);
+        if (registerDTO.firstName().isBlank()) {
+            return new ResponseEntity<>("First name is required", HttpStatus.BAD_REQUEST);
+        }
+
+        if (registerDTO.lastName().isBlank()) {
+            return new ResponseEntity<>("Last name is required", HttpStatus.BAD_REQUEST);
+        }
+
+        if (registerDTO.email().isBlank()) {
+            return new ResponseEntity<>("Email is required", HttpStatus.BAD_REQUEST);
+        }
+
+        if (registerDTO.password().isBlank()) {
+            return new ResponseEntity<>("Password is required", HttpStatus.BAD_REQUEST);
         }
 
         if (registerDTO.password().length() < 8) {
             return new ResponseEntity<>("Password must be at least 8 characters long", HttpStatus.BAD_REQUEST);
         }
 
-        Client newClient = new Client(registerDTO.firstName(), registerDTO.lastName(), registerDTO.email(), passwordEncoder.encode(registerDTO.password()));
-        ClientDTO clientDTO = new ClientDTO(clientRepository.save(newClient));
+        if (!registerDTO.password().matches(".*[A-Z].*")) {
+            return new ResponseEntity<>("Password must contain at least one uppercase letter", HttpStatus.BAD_REQUEST);
+        }
+        if (!registerDTO.password().matches(".*[a-z].*")) {
+            return new ResponseEntity<>("Password must contain at least one lowercase letter", HttpStatus.BAD_REQUEST);
+        }
+        if (!registerDTO.password().matches(".*[0-9].*")) {
+            return new ResponseEntity<>("Password must contain at least one number", HttpStatus.BAD_REQUEST);
+        }
+        if (!registerDTO.password().matches(".*[^a-zA-Z0-9].*")) {
+            return new ResponseEntity<>("Password must contain at least one symbol", HttpStatus.BAD_REQUEST);
+        }
 
-        Account account = new Account(num.generateAccountNumber(), LocalDate.now(), 0);
-        newClient.addAccount(account);
-        AccountDTO accountDTO = new AccountDTO(accountRepository.save(account));
+        return null;
+    }
 
-        clientRepository.save(newClient);
 
-        return new ResponseEntity<>("Client registered successfully", HttpStatus.CREATED);
+    public Account generateAccount(RegisterDTO registerDTO) {
+        return new Account(num.generateAccountNumber(), LocalDate.now(), 0);
+    }
+
+    public Client generateClient(RegisterDTO registerDTO) {
+        return new Client(registerDTO.firstName(), registerDTO.lastName(), registerDTO.email(), passwordEncoder.encode(registerDTO.password()));
+    }
+
+    public void saveClientAndAccount(Client client, Account account) {
+        client.addAccount(account);
+        clientRepository.save(client);
+        accountRepository.save(account);
     }
 
     @Override

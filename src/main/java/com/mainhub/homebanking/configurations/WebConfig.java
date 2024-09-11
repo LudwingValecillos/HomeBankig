@@ -52,14 +52,13 @@ public class WebConfig {
                         HeadersConfigurer.FrameOptionsConfig::disable))
                 .authorizeHttpRequests(authorize ->
                         authorize
-                                .requestMatchers("/h2-console/**").permitAll()
-                                .requestMatchers("/api/current", "/api/accounts/clients/current/accounts", "/api/cards/clients/current/cards", "/api/transactions/clients/current/transactions"
-                                        , "/api/loans/apply", "/api/loans/loansAvailable").hasRole("CLIENT")
-                                .requestMatchers("/api/clients/", "/api/clients/**", "/api/accounts/", "/api/accounts/**", "/api/cards/", "/api/cards/**","/api/loans/", "/api/loans/**").hasRole("ADMIN")
                                 .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+
+                                .requestMatchers("/api/current", "/api/accounts/clients/current/accounts", "/api/cards/clients/current/cards", "/api/transactions/clients/current/transactions"
+                                        , "/api/loans/apply", "/api/loans/loansAvailable", "/api/loans/loansApplied", "/api/accounts/delete/{id}").hasRole("CLIENT")
+                                .requestMatchers("/api/clients/", "/api/clients/**", "/api/accounts/", "/api/accounts/**", "/api/cards/", "/api/cards/**", "/api/loans/", "/api/loans/**").hasRole("ADMIN")
                                 .anyRequest().authenticated()
                 )
-
 
                 //Se agrega el filtro de autenticación antes del filtro de autenticación de recursos
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)

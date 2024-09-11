@@ -1,5 +1,7 @@
+// LoanServicesImpl.java
 package com.mainhub.homebanking.services.implement;
 
+import com.mainhub.homebanking.DTO.ClientLoanDTO;
 import com.mainhub.homebanking.DTO.LoanAplicationDTO;
 import com.mainhub.homebanking.DTO.LoanDTO;
 import com.mainhub.homebanking.models.*;
@@ -39,11 +41,6 @@ public class LoanServicesImpl implements LoanServices {
     @Autowired
     private TransactionRepository transactionRepository;
 
-//    @Override
-//    public List<Loan> getAllLoans() {
-//        return null;
-//    }
-
     @Override
     public List<LoanDTO> getAllLoansDTO() {
         return loanRepository.findAll().stream()
@@ -53,98 +50,150 @@ public class LoanServicesImpl implements LoanServices {
 
     @Transactional
     @Override
-    public ResponseEntity<String> applyForLoan(Authentication authentication, LoanAplicationDTO loanDTO) {
-        Client client = clientRepository.findByEmail(authentication.getName());
+    public ResponseEntity<?> applyForLoan(Authentication authentication, LoanAplicationDTO loanAplicationDTO) {
+        try {
 
-        // Validaciones previas
-        ResponseEntity<String> validationResponse = validateLoanApplication(loanDTO, client);
-        if (validationResponse != null) {
-            return validationResponse;
+            Client client = getClient(authentication.getName());
+
+            Loan loan = getLoan(loanAplicationDTO.id());
+
+            if (validateLoanApplication(loanAplicationDTO, client, loan) != null) {
+                return new ResponseEntity<>(validateLoanApplication(loanAplicationDTO, client, loan), HttpStatus.BAD_REQUEST);
+            }
+
+            // Verifica si el cliente ya ha aplicado para este préstamo
+            if (clientHasAppliedForLoan(client, loan)) {
+                return new ResponseEntity<>("Loan already applied", HttpStatus.BAD_REQUEST);
+            }
+
+            // Procesa la solicitud de préstamo
+            return new ResponseEntity<>(processLoanApplication(client, loanAplicationDTO, getAccount(loanAplicationDTO.destinationAccount())), HttpStatus.OK);
+        } catch (Exception e) {
+
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
-
-        Loan loan = loanRepository.findById(loanDTO.id()).orElse(null);
-        validationResponse = validateLoanDetails(loanDTO, loan);
-        if (validationResponse != null) {
-            return validationResponse;
-        }
-
-        //Validacion si el cliente ya aplico para el prestamo
-        if (clientHasAppliedForLoan(client, loan)) {
-            return new ResponseEntity<>("Loan already applied", HttpStatus.BAD_REQUEST);
-        }
-
-        Account account = accountRepository.findByNumber(loanDTO.destinationAccount());
-        if (account == null) {
-            return new ResponseEntity<>("Account not found", HttpStatus.NOT_FOUND);
-        }
-
-        LoanApplication(client, loan, loanDTO, account);
-
-        return new ResponseEntity<>("Loan " + loan.getName() + " applied successfully", HttpStatus.OK);
     }
 
-    private boolean clientHasAppliedForLoan(Client client, Loan loan) {
+    @Override
+    public Client getClient(String email) {
+        return clientRepository.findByEmail(email);
+    }
+
+
+    @Override
+    public Loan getLoan(Long id) {
+        return loanRepository.findById(id).orElse(null);
+    }
+
+
+    @Override
+    public String validateLoanApplication(LoanAplicationDTO loanAplicationDTO, Client client, Loan loan) {
+        if (loanAplicationDTO.amount() <= 0 || loanAplicationDTO.payments() <= 0 || loanAplicationDTO.destinationAccount().isBlank() || loanAplicationDTO.id() <= 0) {
+            return "The amount or description is empty";
+        }
+
+        if (loan == null) {
+            return "Loan not found";
+        }
+        if (loanAplicationDTO.amount() > loan.getMaxAmount()) {
+            return "Amount invalid";
+        }
+        if (!loan.getPayments().contains(loanAplicationDTO.payments())) {
+            return "Payments invalid";
+        }
+
+        if (validations.validateAccountToClient(loanAplicationDTO.destinationAccount(), client)) {
+            return "Account not found";
+        }
+
+        if (getAccount(loanAplicationDTO.destinationAccount()) == null) {
+            return "Account not found";
+        }
+
+
+        return null;
+    }
+
+
+    @Override
+    public Account getAccount(String accountNumber) {
+        return accountRepository.findByNumber(accountNumber);
+    }
+
+    // Verifica si el cliente ya ha aplicado para este préstamo
+
+    @Override
+    public boolean clientHasAppliedForLoan(Client client, Loan loan) {
         return client.getLoans().stream()
                 .anyMatch(c -> c.getLoan().getId() == loan.getId());
     }
 
-    private void LoanApplication(Client client, Loan loan, LoanAplicationDTO loanDTO, Account account) {
-        // Crear y registrar transacción
-        Transaction transaction = new Transaction(TransactionType.CREDIT, loanDTO.amount(), "Loan " + loan.getName());
-        account.addTransaction(transaction);
 
-        // Crear y asociar ClientLoan
-        ClientLoan clientLoan = new ClientLoan(loanDTO.amount(), loanDTO.payments());
+    @Override
+    public String processLoanApplication(Client client, LoanAplicationDTO loanAplicationDTO, Account destinationAccount) {
+
+        destinationAccount.addTransaction(generateTransactionLoan(getLoan(loanAplicationDTO.id()), loanAplicationDTO));
+        ClientLoan clientLoan = generateClientLoan(getLoan(loanAplicationDTO.id()), loanAplicationDTO);
+
         client.addClientLoan(clientLoan);
-        loan.addClientLoan(clientLoan);
+        getLoan(loanAplicationDTO.id()).addClientLoan(clientLoan);
 
-        // Guardar cambios
-        accountRepository.save(account);
-        transactionRepository.save(transaction);
         clientLoanRepository.save(clientLoan);
-        clientRepository.save(client);
+
+        return "Loan " + getLoan(loanAplicationDTO.id()).getName() + " applied successfully";
     }
 
-    private ResponseEntity<String> validateLoanApplication(LoanAplicationDTO loanDTO, Client client) {
-        if (loanDTO.amount() <= 0 || loanDTO.payments() <= 0 || loanDTO.destinationAccount().isBlank() || loanDTO.id() <= 0) {
-            return new ResponseEntity<>("The amount or description is empty", HttpStatus.BAD_REQUEST);
-        }
-        if (!validations.validateAccountToClient(loanDTO.destinationAccount(), client)) {
-            return new ResponseEntity<>("Account not found", HttpStatus.NOT_FOUND);
-        }
-        return null;
+
+    @Override
+    public Transaction generateTransactionLoan(Loan loan, LoanAplicationDTO loanAplicationDTO) {
+        return new Transaction(TransactionType.CREDIT, loanAplicationDTO.amount(), "Loan " + loan.getName());
     }
 
-    private ResponseEntity<String> validateLoanDetails(LoanAplicationDTO loanDTO, Loan loan) {
-        if (loan == null) {
-            return new ResponseEntity<>("Loan not found", HttpStatus.NOT_FOUND);
-        }
-        if (loanDTO.amount() > loan.getMaxAmount()) {
-            return new ResponseEntity<>("Amount invalid", HttpStatus.BAD_REQUEST);
-        }
-        if (!loan.getPayments().contains(loanDTO.payments())) {
-            return new ResponseEntity<>("Payments invalid", HttpStatus.BAD_REQUEST);
-        }
-        return null;
+
+    @Override
+    public ClientLoan generateClientLoan(Loan loan, LoanAplicationDTO loanAplicationDTO) {
+        return new ClientLoan(calculateLoanAmount(loanAplicationDTO), loanAplicationDTO.payments());
+    }
+
+
+    @Override
+    public double calculateLoanAmount(LoanAplicationDTO loanDTO) {
+        double amount = loanDTO.amount();
+        double rate = loanDTO.payments() <= 12 ? 0.15 : loanDTO.payments() > 12 ? 0.25 : 0.20;
+        return (amount * rate) + amount;
     }
 
     @Override
-    public ResponseEntity<?> getLoansClient(Authentication authentication) {
-        Client client = clientRepository.findByEmail(authentication.getName());
-
-        Set<Long> clientLoanIds = client.getLoans().stream()
-                .map(clientLoan -> clientLoan.getLoan().getId())
-                .collect(Collectors.toSet());
-
-        List<LoanDTO> availableLoans = loanRepository.findAll().stream()
-                .filter(loan -> !clientLoanIds.contains(loan.getId()))
-                .map(LoanDTO::new)
-                .collect(Collectors.toList());
-
+    public ResponseEntity<?> loansAvailable(Authentication authentication) {
+        List<LoanDTO> availableLoans = getAvailableLoansForClient(getClient(authentication.getName()));
         if (availableLoans.isEmpty()) {
             return new ResponseEntity<>("No loans available", HttpStatus.OK);
         }
 
         return new ResponseEntity<>(availableLoans, HttpStatus.OK);
     }
+
+    @Override
+    public ResponseEntity<?> loansApplied(Authentication authentication) {
+        Client client = getClient(authentication.getName());
+        List<ClientLoanDTO> appliedLoans = client.getLoans().stream()
+                .map(ClientLoanDTO::new)
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(appliedLoans, HttpStatus.OK);
+    }
+
+    // getAvailableLoansForClient obtiene los préstamos disponibles para el cliente
+
+    public List<LoanDTO> getAvailableLoansForClient(Client client) {
+        Set<Long> clientLoanIds = client.getLoans().stream()
+                .map(clientLoan -> clientLoan.getLoan().getId())
+                .collect(Collectors.toSet());
+
+        return loanRepository.findAll().stream()
+                .filter(loan -> !clientLoanIds.contains(loan.getId()))
+                .map(LoanDTO::new)
+                .collect(Collectors.toList());
+    }
+
 }

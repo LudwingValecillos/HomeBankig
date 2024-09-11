@@ -3,6 +3,7 @@ package com.mainhub.homebanking.models;
 import com.mainhub.homebanking.utils.GenerateNumber;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 //Anotaciones
@@ -127,6 +128,7 @@ public class Client {
 
     public void addCard(Card card){
         this.cards.add(card);
+        card.setFromDate(LocalDateTime.now());
         card.setNumber(new GenerateNumber().generateNumber());
         card.setClient(this);
         card.setCardHolder(this.firstName + " " + this.lastName);

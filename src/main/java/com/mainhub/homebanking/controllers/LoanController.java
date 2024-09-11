@@ -21,7 +21,12 @@ public class LoanController {
 
     @GetMapping("/loansAvailable")
     public ResponseEntity<?> loansAvailable(Authentication authentication) {
-        return loanServices.getLoansClient(authentication);
+        return loanServices.loansAvailable(authentication);
+    }
+
+    @GetMapping("/loansApplied")
+    public ResponseEntity<?> loansApplied(Authentication authentication) {
+        return loanServices.loansApplied(authentication);
     }
 
     @PostMapping("/apply")

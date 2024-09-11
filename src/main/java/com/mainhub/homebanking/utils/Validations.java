@@ -11,9 +11,7 @@ public class Validations {
 
     public boolean validateAccountToClient(String accountNumber, Client client) {
 
-        if (client.getAccounts().stream().noneMatch(account -> account.getNumber().equals(accountNumber))) {
-            return false;
-        }
-        return true;
+        return client.getAccounts().stream().noneMatch(account -> account.getNumber().equals(accountNumber));
+
     }
 }

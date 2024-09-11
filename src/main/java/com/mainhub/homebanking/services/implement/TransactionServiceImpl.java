@@ -27,76 +27,92 @@ public class TransactionServiceImpl implements TransactionsService {
     @Autowired
     private TransactionRepository transactionRepository;
 
-
-
     @Transactional
-    public ResponseEntity<String> processTransaction(String email, NewTransactionDTO transactionDTO) {
+    @Override
+    public ResponseEntity<?> processTransaction(String email, NewTransactionDTO transactionDTO) {
 
-        // Validate transaction data
-        ResponseEntity<String> validationResponse = validateTransaction(transactionDTO);
-        if (validationResponse != null) {
-            return validationResponse;
+        if (validateTransaction(transactionDTO) != null) {
+            return new ResponseEntity<>(validateTransaction(transactionDTO), HttpStatus.BAD_REQUEST);
         }
 
-        // Check client and accounts
-        ResponseEntity<String> clientAccountResponse = checkClientAndAccounts(email, transactionDTO);
-        if (clientAccountResponse != null) {
-            return clientAccountResponse;
+        if (checkClientAndAccounts(email, transactionDTO) != null) {
+            return new ResponseEntity<>(checkClientAndAccounts(email, transactionDTO), HttpStatus.BAD_REQUEST);
         }
 
-        // Perform transaction
-        return performTransaction(transactionDTO);
+        if (validateAmount(transactionDTO) != null) {
+            return new ResponseEntity<>(validateAmount(transactionDTO), HttpStatus.BAD_REQUEST);
+        }
+
+        return new ResponseEntity<>(performTransaction(transactionDTO), HttpStatus.OK);
     }
 
-    public ResponseEntity<String> validateTransaction(NewTransactionDTO transactionDTO) {
-        if (transactionDTO.amount() == 0 || transactionDTO.description().isBlank()
-                || transactionDTO.sourceAccount().isBlank() || transactionDTO.destinationAccount().isBlank()) {
-            return new ResponseEntity<>("All fields are required", HttpStatus.BAD_REQUEST);
+    @Override
+    public String validateTransaction(NewTransactionDTO transactionDTO) {
+
+        if (transactionDTO.amount() == 0) {
+            return "The 'amount' field is required and cannot be zero.";
         }
+
+        if (transactionDTO.description().isBlank()) {
+            return "The 'description' field is required.";
+        }
+
+        if (transactionDTO.sourceAccount().isBlank()) {
+            return "The 'source account' field is required.";
+        }
+
+        if (transactionDTO.destinationAccount().isBlank()) {
+            return "The 'destination account' field is required.";
+        }
+
         if (transactionDTO.sourceAccount().equals(transactionDTO.destinationAccount())) {
-            return new ResponseEntity<>("Source and destination accounts cannot be the same", HttpStatus.BAD_REQUEST);
+            return "Source and destination accounts cannot be the same";
         }
         return null;
     }
 
-    public ResponseEntity<String> checkClientAndAccounts(String email, NewTransactionDTO transactionDTO) {
+    @Override
+    public String checkClientAndAccounts(String email, NewTransactionDTO transactionDTO) {
         Client client = clientRepository.findByEmail(email);
 
-        if (client == null) {
-            return new ResponseEntity<>("Client not found", HttpStatus.BAD_REQUEST);
-        }
-
-        if (client.getAccounts().stream().noneMatch(account -> account.getNumber().equals(transactionDTO.sourceAccount()))) {
-            return new ResponseEntity<>("Source account not found", HttpStatus.BAD_REQUEST);
-        }
-
+        //Devuelve true si encuentra una cuenta con el número de cuenta
         if (!accountRepository.existsByNumber(transactionDTO.destinationAccount())) {
-            return new ResponseEntity<>("Destination account not found", HttpStatus.BAD_REQUEST);
+            return "Destination account not found";
+        }
+        //NoneMatch: devuelve true si ninguno de los elementos del stream coincide
+        if (client.getAccounts().stream().noneMatch(account -> account.getNumber().equals(transactionDTO.sourceAccount()))) {
+            return "Source account not found";
         }
 
         return null;
     }
 
-    public ResponseEntity<String> performTransaction(NewTransactionDTO transactionDTO) {
-        Account sourceAccount = accountRepository.findByNumber(transactionDTO.sourceAccount());
-        Account destinationAccount = accountRepository.findByNumber(transactionDTO.destinationAccount());
+    public Client getClient(String email) {
+        return clientRepository.findByEmail(email);
+    }
 
-        if (sourceAccount.getBalance() < transactionDTO.amount()) {
-            return new ResponseEntity<>("Not enough balance", HttpStatus.BAD_REQUEST);
+    @Override
+    public String performTransaction(NewTransactionDTO transactionDTO) {
+        getSourceAccount(transactionDTO).addTransaction(transactionRepository.save(new Transaction(TransactionType.DEBIT, -transactionDTO.amount(), transactionDTO.description())));
+        getDestinationAccount(transactionDTO).addTransaction(transactionRepository.save(new Transaction(TransactionType.CREDIT, transactionDTO.amount(), transactionDTO.description())));
+        return "Transaction created";
+    }
+
+    @Override
+    public String validateAmount(NewTransactionDTO transactionDTO) {
+        if (getSourceAccount(transactionDTO).getBalance() < transactionDTO.amount()) {
+            return "Not enough balance";
         }
+        return null;
+    }
 
-        Transaction transactionSource = new Transaction(TransactionType.DEBIT, -transactionDTO.amount(), transactionDTO.description());
-        sourceAccount.addTransaction(transactionSource);
+    @Override
+    public Account getSourceAccount(NewTransactionDTO transactionDTO) {
+        return accountRepository.findByNumber(transactionDTO.sourceAccount());
+    }
 
-        Transaction transactionDestination = new Transaction(TransactionType.CREDIT, transactionDTO.amount(), transactionDTO.description());
-        destinationAccount.addTransaction(transactionDestination);
-
-        transactionRepository.save(transactionSource);
-        transactionRepository.save(transactionDestination);
-
-        accountRepository.save(sourceAccount);
-        accountRepository.save(destinationAccount);
-
-        return new ResponseEntity<>("Transaction created", HttpStatus.CREATED);
+    @Override
+    public Account getDestinationAccount(NewTransactionDTO transactionDTO) {
+        return accountRepository.findByNumber(transactionDTO.destinationAccount());
     }
 }
