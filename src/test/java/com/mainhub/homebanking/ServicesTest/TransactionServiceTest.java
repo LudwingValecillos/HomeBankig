@@ -78,9 +78,18 @@ public class TransactionServiceTest {
     @Test
     public void testCheckClientAndAccounts() {
 
-        String aa = transactionService.checkClientAndAccounts("ludwingval@gmail", new NewTransactionDTO(100, "test description", "VIN001", "VIN004"));
-        assertThat(aa, is(nullValue()));
+        String aa = transactionService.checkClientAndAccounts("melba@mindhub.com", new NewTransactionDTO(100, "test description", "VIN001", "VIN004"));
+
+        assertThat(aa, not(nullValue()));
     }
+
+    @Test
+    void testGetClient() {
+       Client client = transactionService.getClient("melba@mindhub.com");
+
+        assertThat(client, notNullValue());
+    }
+
 
     @Test
     public void testValidateAmount() {

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,25 +32,25 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 public class AuthServiceTest {
 
-    @Mock
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Mock
+    @Autowired
     private ClientRepository clientRepository;
 
-    @Mock
+    @Autowired
     private AccountRepository accountRepository;
 
-    @Mock
+    @Autowired
     private AuthenticationManager authenticationManager;
 
-    @Mock
+    @Autowired
     private UserDetailsService userDetailsService;
 
-    @Mock
+    @Autowired
     private JwtUtilService jwtUtilService;
 
-    @Mock
+    @Autowired
     private GenerateNumber num;
 
     @InjectMocks
