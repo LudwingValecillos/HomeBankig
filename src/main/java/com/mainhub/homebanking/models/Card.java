@@ -15,15 +15,10 @@ public class Card {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "client_id")
     private Client client;
-
     private String CardHolder;
-
     private int cvv;
-
     private String number;
-
     private LocalDateTime fromDate, thruDate;
-
     @Enumerated(EnumType.STRING) //Enumerated indica que el tipo de dato es una cadena
     private CardType type;
     @Enumerated(EnumType.STRING) //Enumerated indica que el tipo de dato es una cadena
@@ -32,13 +27,12 @@ public class Card {
     public Card() {
     }
 
-
-
     public Card(LocalDateTime thruDate, CardType type, CardColor color) {
 
         this.thruDate = thruDate;
         this.type = type;
         this.color = color;
+
     }
 
     public long getId() {

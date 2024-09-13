@@ -88,8 +88,18 @@ public class LoanServicesImpl implements LoanServices {
 
     @Override
     public String validateLoanApplication(LoanAplicationDTO loanAplicationDTO, Client client, Loan loan) {
-        if (loanAplicationDTO.amount() <= 0 || loanAplicationDTO.payments() <= 0 || loanAplicationDTO.destinationAccount().isBlank() || loanAplicationDTO.id() <= 0) {
-            return "The amount or description is empty";
+
+        if (loanAplicationDTO.amount() <= 0){
+            return "Amount invalid";
+        }
+        if (loanAplicationDTO.payments() <= 0){
+            return "Payments invalid";
+        }
+        if (loanAplicationDTO.destinationAccount().isBlank()){
+            return "Account is blank";
+        }
+        if (loanAplicationDTO.id() <= 0){
+            return "Id invalid";
         }
 
         if (loan == null) {

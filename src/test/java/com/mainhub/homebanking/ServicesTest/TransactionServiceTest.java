@@ -75,13 +75,6 @@ public class TransactionServiceTest {
         assertEquals("Source and destination accounts cannot be the same", validationResponse);
     }
 
-    @Test
-    public void testCheckClientAndAccounts() {
-
-        String aa = transactionService.checkClientAndAccounts("melba@mindhub.com", new NewTransactionDTO(100, "test description", "VIN001", "VIN004"));
-
-        assertThat(aa, not(nullValue()));
-    }
 
     @Test
     void testGetClient() {

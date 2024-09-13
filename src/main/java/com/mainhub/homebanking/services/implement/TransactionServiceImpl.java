@@ -48,6 +48,12 @@ public class TransactionServiceImpl implements TransactionsService {
 
     @Override
     public String validateTransaction(NewTransactionDTO transactionDTO) {
+        if (transactionDTO.amount()  < 0) {
+            return "The 'amount' field must be positive.";
+        }
+        if(transactionDTO.amount() == 0) {
+            return "The 'amount' field is required and cannot be zero.";
+        }
 
         if (transactionDTO.amount() == 0) {
             return "The 'amount' field is required and cannot be zero.";
