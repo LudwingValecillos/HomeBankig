@@ -1,6 +1,7 @@
 package com.mainhub.homebanking.services.implement;
 
 import com.mainhub.homebanking.DTO.CardDTO;
+import com.mainhub.homebanking.DTO.ClientDTO;
 import com.mainhub.homebanking.DTO.NewCardDTO;
 import com.mainhub.homebanking.models.Card;
 import com.mainhub.homebanking.models.Client;
@@ -126,10 +127,10 @@ public class CardServicesImple implements CardServices {
         return new Card(getExpirationDate(5), getCardType(newCardDTO.type()), getCardColor(newCardDTO.color()));
     }
 
-    public String saveCard(Client client, Card card) {
+    public CardDTO saveCard(Client client, Card card) {
         client.addCard(card);
         cardRepository.save(card);
-        return "Card created";
+        return new CardDTO(card);
     }
 
     @Override

@@ -83,7 +83,6 @@ public class TransactionServiceTest {
         assertThat(client, notNullValue());
     }
 
-
     @Test
     public void testValidateAmount() {
 

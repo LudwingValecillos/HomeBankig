@@ -142,7 +142,7 @@ public class LoanServicesImpl implements LoanServices {
     @Override
     public String processLoanApplication(Client client, LoanAplicationDTO loanAplicationDTO, Account destinationAccount) {
 
-        destinationAccount.addTransaction(generateTransactionLoan(getLoan(loanAplicationDTO.id()), loanAplicationDTO));
+        destinationAccount.addTransaction(transactionRepository.save(generateTransactionLoan(getLoan(loanAplicationDTO.id()), loanAplicationDTO)));
         ClientLoan clientLoan = generateClientLoan(getLoan(loanAplicationDTO.id()), loanAplicationDTO);
 
         client.addClientLoan(clientLoan);
