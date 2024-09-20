@@ -54,9 +54,9 @@ public class AccountServicesImpl implements AccountServices {
             return new ResponseEntity<>("You can't have more than 3 accounts", HttpStatus.FORBIDDEN);
         }
 
-        saveAccount(getClient(authentication), createAccount());
 
-        return new ResponseEntity<>("Account created", HttpStatus.CREATED);
+        return new ResponseEntity<>(saveAccount(getClient(authentication), createAccount())
+                , HttpStatus.CREATED);
     }
 
     @Override
@@ -92,10 +92,11 @@ public class AccountServicesImpl implements AccountServices {
         return accountRepository.findByClient(client);
     }
     @Override
-    public void saveAccount(Client client, Account account) {
+    public AccountDTO saveAccount(Client client, Account account) {
         client.addAccount(account);
         accountRepository.save(account);
         clientRepository.save(client);
+        return new AccountDTO(account);
     }
     @Override
     public Account createAccount() {

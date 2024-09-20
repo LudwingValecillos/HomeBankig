@@ -24,7 +24,7 @@ public interface AccountServices {
 
     List<Account> getAccountsByClient(Authentication authentication);
 
-    void saveAccount(Client client, Account account);
+    AccountDTO saveAccount(Client client, Account account);
 
     Account createAccount();
 
