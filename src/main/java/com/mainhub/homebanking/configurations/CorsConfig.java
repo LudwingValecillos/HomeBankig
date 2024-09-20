@@ -21,7 +21,7 @@ public class CorsConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         //Se establecen las rutas permitidas, que nos pueden pegar a nuestra app
-        configuration.setAllowedOrigins(io.jsonwebtoken.lang.Arrays.asList(new String[]{"http://localhost:8080", "http://localhost:5175"}));
+        configuration.setAllowedOrigins(io.jsonwebtoken.lang.Arrays.asList(new String[]{"http://localhost:8080", "http://localhost:5176"}));
 
         //Se establecen los métodos HTTP permitidos utilizando
         configuration.setAllowedMethods(Arrays.asList(new String[]{"GET", "POST", "PUT", "DELETE"}));
