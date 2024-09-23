@@ -135,13 +135,13 @@ public class HomebankingApplication {
 
 
 
-			Loan hipotcario = new Loan("Hipotecario", 500000, Arrays.asList(12, 24, 36, 48, 60));
+			Loan hipotcario = new Loan("Mortgage", 500000, Arrays.asList(12, 24, 36, 48, 60));
 			loanRepository.save(hipotcario);
 
 			Loan personal = new Loan("Personal", 100000, Arrays.asList(6, 12, 24));
 			loanRepository.save(personal);
 
-			Loan automotriz = new Loan("Automotriz", 300000, Arrays.asList(6, 12, 24,36));
+			Loan automotriz = new Loan("Automotive", 300000, Arrays.asList(6, 12, 24,36));
 			loanRepository.save(automotriz);
 
 			// --------------------------- LOAM------------------------
