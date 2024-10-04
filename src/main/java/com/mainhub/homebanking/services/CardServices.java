@@ -1,5 +1,6 @@
 package com.mainhub.homebanking.services;
 
+import com.mainhub.homebanking.DTO.AddCardDTO;
 import com.mainhub.homebanking.DTO.CardDTO;
 import com.mainhub.homebanking.DTO.NewCardDTO;
 import com.mainhub.homebanking.models.Card;
@@ -42,6 +43,8 @@ public interface CardServices {
     CardColor getCardColor(String color);
 
     CardType getCardType(String type);
+
+    ResponseEntity<?> apply(AddCardDTO addCardDTO);
 
 
 }

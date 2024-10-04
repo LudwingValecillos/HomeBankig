@@ -1,5 +1,6 @@
 package com.mainhub.homebanking.controllers;
 
+import com.mainhub.homebanking.DTO.AddCardDTO;
 import com.mainhub.homebanking.DTO.CardDTO;
 import com.mainhub.homebanking.DTO.NewCardDTO;
 import com.mainhub.homebanking.models.Card;
@@ -45,6 +46,9 @@ public class CardController {
     @PostMapping("/clients/current/cards")
     public ResponseEntity<?> createCard(Authentication authentication, @RequestBody NewCardDTO newCardDTO) {
         return cardServices.createCard(authentication, newCardDTO);
-
+    }
+    @PostMapping("/clients/current/payment")
+    public ResponseEntity<?> createCard( @RequestBody AddCardDTO addCardDTO) {
+        return cardServices.apply(addCardDTO);
     }
 }

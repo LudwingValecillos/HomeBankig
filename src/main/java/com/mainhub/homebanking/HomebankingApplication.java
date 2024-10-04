@@ -135,7 +135,7 @@ public class HomebankingApplication {
 
 
 
-			Loan hipotcario = new Loan("Mortgage", 500000, Arrays.asList(12, 24, 36, 48, 60));
+			Loan hipotcario = new Loan("Mortgage", 500000, Arrays.asList(12, 24, 36, 48,  60));
 			loanRepository.save(hipotcario);
 
 			Loan personal = new Loan("Personal", 100000, Arrays.asList(6, 12, 24));
@@ -182,13 +182,18 @@ public class HomebankingApplication {
 			//------------------CARDS----------------------
 
 			Card cardLud = new Card(LocalDateTime.now().plusYears(5).plusYears(5), CardType.DEBIT, CardColor.SILVER);
-
-
+			cardLud.setNumber("1234-5678-9012-3456");
+			cardLud.setCvv(122);
 			ludwing.addCard(cardLud);
+
 			cardRepository.save(cardLud);
 
 			Card card1 = new Card(LocalDateTime.now().plusYears(5), CardType.DEBIT, CardColor.GOLD);
 			Card card2 = new Card(LocalDateTime.now().plusYears(10), CardType.CREDIT, CardColor.TITANIUM);
+			card1.setNumber("1234-5678-9012-3457");
+			card2.setNumber("1234-5678-9012-3458");
+			card1.setCvv(123);
+			card2.setCvv(124);
 
 			melba.addCard(card1);
 			melba.addCard(card2);

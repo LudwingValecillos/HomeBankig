@@ -130,10 +130,10 @@ public class Client {
     public void addCard(Card card){
         this.cards.add(card);
         card.setFromDate(LocalDateTime.now());
-        card.setNumber(new GenerateNumber().generateNumber());
+//        card.setNumber(new GenerateNumber().generateNumber());
         card.setClient(this);
         card.setCardHolder(this.firstName + " " + this.lastName);
-        card.setCvv(new Random().nextInt((999 - 100) + 1) + 100);
+//        card.setCvv(new Random().nextInt((999 - 100) + 1) + 100);
     }
 
     @Override

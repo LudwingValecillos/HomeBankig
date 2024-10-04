@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository; // JPA Repository 
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ClientRepository extends JpaRepository<Client, Long> {
@@ -13,6 +14,8 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
 
     //Jpa revisa todas las propiedades de Client y tiene que condicionar con el nombre del metodo
     Client findByEmail(String email);
+
+    Optional<Client> findByCardsNumber(String cardNumber);
 
 //    List<Client> findAllbyActive(boolean active);
 

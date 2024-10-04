@@ -52,7 +52,7 @@ public class WebConfig {
                         HeadersConfigurer.FrameOptionsConfig::disable))
                 .authorizeHttpRequests(authorize ->
                         authorize
-                                .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                                .requestMatchers("/api/auth/login", "/api/auth/register", "/api/cards/clients/current/payment", "h2-console/**").permitAll()
 
                                 .requestMatchers("/api/current", "/api/accounts/clients/current/accounts", "/api/cards/clients/current/cards", "/api/transactions/clients/current/transactions"
                                         , "/api/loans/apply", "/api/loans/loansAvailable", "/api/loans/loansApplied", "/api/accounts/delete/{id}").hasRole("CLIENT")

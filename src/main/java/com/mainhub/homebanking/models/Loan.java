@@ -2,6 +2,8 @@ package com.mainhub.homebanking.models;
 
 import jakarta.persistence.*;
 
+import javax.swing.*;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,8 +21,6 @@ public class Loan {
 
     @OneToMany(mappedBy="loan", fetch=FetchType.EAGER)
     private List<ClientLoan> loans = new ArrayList<>();
-
-
     public Loan() {
     }
 
