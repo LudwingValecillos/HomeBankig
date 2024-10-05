@@ -21,7 +21,7 @@ public class CorsConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         //Se establecen las rutas permitidas, que nos pueden pegar a nuestra app
-        configuration.setAllowedOrigins(Arrays.asList(new String[]{"http://localhost:8080", "http://localhost:5174", "https://homebankig.onrender.com", "https://homebankig-frontend.onrender.com"}));
+        configuration.setAllowedOrigins(Arrays.asList(new String[]{"http://localhost:8080", "http://localhost:5174", "https://homebankig.onrender.com", "https://homebankig-frontend.onrender.com","http://localhost:5173"}));
 
         //Se establecen los métodos HTTP permitidos utilizando
         configuration.setAllowedMethods(Arrays.asList(new String[]{"GET", "POST", "PUT", "DELETE"}));
