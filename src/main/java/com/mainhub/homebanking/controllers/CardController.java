@@ -24,6 +24,7 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
+@CrossOrigin("http://localhost:5173/")
 @RestController
 @RequestMapping("/api/cards/")
 public class CardController {
