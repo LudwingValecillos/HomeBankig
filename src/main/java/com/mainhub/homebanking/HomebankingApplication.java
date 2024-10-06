@@ -48,9 +48,9 @@ public class HomebankingApplication {
 			clientRepository.save(ludwing);
 
 			// Crear y guardar cuentas para Pepe
-			Account cuenta1Pepe = new Account("VIN001", today, 500);
-			Account cuenta2Pepe = new Account("VIN002", today, 7500);
-			Account cuenta3Pepe = new Account("VIN003", today, 7500);
+			Account cuenta1Pepe = new Account("VIN001", today, 50000);
+			Account cuenta2Pepe = new Account("VIN002", today, 75000);
+			Account cuenta3Pepe = new Account("VIN003", today, 75000);
 
 			ludwing.addAccount(cuenta1Pepe);
 			ludwing.addAccount(cuenta2Pepe);
@@ -87,8 +87,8 @@ public class HomebankingApplication {
 			clientRepository.save(melba);
 
 			// Crear y guardar cuentas para Melba
-			Account cuenta1Melba = new Account("VIN004", today, 10000);
-			Account cuenta2Melba = new Account("VIN005", today, 2000);
+			Account cuenta1Melba = new Account("VIN004", today, 100000);
+			Account cuenta2Melba = new Account("VIN005", today, 200000);
 //			Account cuenta3Melba = new Account("VIN010", today, 2000);
 
 			melba.addAccount(cuenta1Melba);
