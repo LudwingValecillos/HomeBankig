@@ -182,7 +182,7 @@ public class HomebankingApplication {
 			//------------------CARDS----------------------
 
 			Card cardLud = new Card(LocalDateTime.now().plusYears(5).plusYears(5), CardType.DEBIT, CardColor.SILVER);
-			cardLud.setNumber("1234-5678-9012-3456");
+			cardLud.setNumber("4517-8968-9859-6523");
 			cardLud.setCvv(122);
 			ludwing.addCard(cardLud);
 
